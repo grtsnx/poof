@@ -1,8 +1,9 @@
 "use client"
 
+import { useState } from "react"
 import { StoredEmail } from "@/lib/db"
-import { formatRelativeTime } from "@/lib/email-utils"
-import { EnvelopeSimple, EnvelopeOpen, Trash, Key, Link, ClockCounterClockwise, FireSimple } from "@phosphor-icons/react"
+import { formatRelativeTime, extractOTPs } from "@/lib/email-utils"
+import { EnvelopeSimple, EnvelopeOpen, Trash, Key, Link, ClockCounterClockwise, FireSimple, Copy, Check } from "@phosphor-icons/react"
 
 interface Props {
   emails: StoredEmail[]
@@ -95,16 +96,14 @@ export function Inbox({ emails, selectedId, onSelect, onDelete, isConnected, onO
             )}
           </div>
           <div className="inbox-item-body">
+            <div className="inbox-item-subject">{email.subject}</div>
             <div className="inbox-item-row">
               <span className="inbox-item-from">{formatFrom(email.from)}</span>
               <span className="inbox-item-time">{formatRelativeTime(email.receivedAt)}</span>
             </div>
-            <div className="inbox-item-subject">{email.subject}</div>
             <div className="inbox-item-badges">
               {email.hasOtp && (
-                <span className="inbox-badge inbox-badge--otp">
-                  <Key size={10} weight="fill" /> OTP
-                </span>
+                <InboxOTPCopy email={email} />
               )}
               {email.hasVerifyLink && (
                 <span className="inbox-badge inbox-badge--link">
@@ -134,4 +133,36 @@ function formatFrom(from: string): string {
   if (nameMatch) return nameMatch[1].trim()
   const domain = from.split("@")[1]
   return domain ? domain.split(".")[0] : from
+}
+
+function InboxOTPCopy({ email }: { email: StoredEmail }) {
+  const [copied, setCopied] = useState(false)
+  const otps = extractOTPs(email.textContent || email.htmlContent || "")
+  if (otps.length === 0) return null
+
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const text = otps.length === 1 ? otps[0] : otps.join(", ")
+    void navigator.clipboard.writeText(text).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+
+  return (
+    <button
+      type="button"
+      className={`inbox-badge inbox-badge--otp inbox-otp-copy${copied ? " inbox-otp-copy--copied" : ""}`}
+      onClick={handleCopy}
+      title={otps.length === 1 ? `Copy ${otps[0]}` : `Copy ${otps.length} codes`}
+    >
+      <Key size={10} weight="fill" />
+      <span className="inbox-otp-copy-code">{otps[0]}</span>
+      {copied ? (
+        <Check size={10} weight="bold" className="inbox-otp-copy-icon" />
+      ) : (
+        <Copy size={10} className="inbox-otp-copy-icon" />
+      )}
+    </button>
+  )
 }

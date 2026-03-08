@@ -20,13 +20,6 @@ export function OTPBadge({ codes }: Props) {
 
   return (
     <div className="otp-container">
-      <div className="otp-header">
-        <span className="otp-pulse" />
-        <span className="otp-title">OTP Detected</span>
-        <span className="otp-subtitle">
-          {codes.length === 1 ? "One code" : `${codes.length} codes`} found — click to copy
-        </span>
-      </div>
       <div className="otp-codes">
         {codes.map((code) => (
           <button key={code} className="otp-code" onClick={() => copy(code)}>

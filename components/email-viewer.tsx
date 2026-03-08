@@ -3,8 +3,7 @@
 import { useState, useMemo } from "react"
 import { useIsMobile } from "@/hooks/use-is-mobile"
 import { StoredEmail } from "@/lib/db"
-import { extractOTPs, extractVerifyLinks, createSandboxedIframeContent } from "@/lib/email-utils"
-import { OTPBadge } from "./otp-badge"
+import { extractVerifyLinks, createSandboxedIframeContent } from "@/lib/email-utils"
 import { formatRelativeTime } from "@/lib/email-utils"
 import { ArrowSquareOut, Paperclip, Eye, Code, ArrowLeft } from "@phosphor-icons/react"
 
@@ -19,7 +18,6 @@ export function EmailViewer({ email, onBack }: Props) {
   const [verifyResult, setVerifyResult] = useState<string | null>(null)
   const isMobile = useIsMobile()
 
-  const otps = useMemo(() => (email ? extractOTPs(email.textContent || email.htmlContent) : []), [email])
   const verifyLinks = useMemo(() => (email ? extractVerifyLinks(email.htmlContent) : []), [email])
   const iframeContent = useMemo(
     () => (email?.htmlContent ? createSandboxedIframeContent(email.htmlContent) : ""),
@@ -104,9 +102,6 @@ export function EmailViewer({ email, onBack }: Props) {
           </button>
         </div>
       </div>
-
-      {/* OTP Badge */}
-      <OTPBadge codes={otps} />
 
       {/* One-Click Verify Buttons */}
       {verifyLinks.length > 0 && (

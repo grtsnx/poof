@@ -1108,7 +1108,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
+  padding: 14px 16px 14px 10px;
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
@@ -1305,8 +1305,8 @@ body {
 }
 .inbox-item:hover { background: var(--bg-3); }
 .inbox-item--selected { background: var(--accent-dim); border-left: 2px solid var(--accent); }
-.inbox-item--unread .inbox-item-from { color: var(--text); font-weight: 600; }
-.inbox-item--unread .inbox-item-subject { color: var(--text); }
+.inbox-item--unread .inbox-item-subject { color: var(--text); font-weight: 600; }
+.inbox-item--unread .inbox-item-from { color: var(--text-2); }
 .inbox-item--unread::before {
   content: '';
   position: absolute;
@@ -1332,13 +1332,14 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  margin-top: 2px;
   margin-bottom: 3px;
 }
 
 .inbox-item-from {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-3);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1353,12 +1354,13 @@ body {
 }
 
 .inbox-item-subject {
-  font-size: 12px;
-  color: var(--text-3);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  margin-bottom: 5px;
+  margin-bottom: 2px;
 }
 
 .inbox-item-badges {
@@ -1384,6 +1386,34 @@ body {
   color: var(--accent);
   background: var(--accent-dim);
   border: 1px solid rgba(205,255,62,0.2);
+}
+
+.inbox-otp-copy {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+.inbox-otp-copy:hover {
+  background: rgba(205,255,62,0.15);
+  border-color: rgba(205,255,62,0.35);
+}
+.inbox-otp-copy-code {
+  color: var(--accent);
+}
+.inbox-otp-copy-icon {
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+.inbox-otp-copy:hover .inbox-otp-copy-icon {
+  color: var(--accent);
+}
+.inbox-otp-copy--copied .inbox-otp-copy-icon {
+  color: var(--success);
 }
 
 .inbox-badge--link {

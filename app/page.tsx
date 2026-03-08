@@ -69,29 +69,19 @@ export default function Home() {
       <div className="app-noise" aria-hidden />
 
       <header className="app-header">
-        <div className="header-logo">
-          <span className="logo-flame-wrap">
-            <FlameLogo size={22} />
-          </span>
-          <span className="logo-text">Poof</span>
-        </div>
-        <nav className="header-nav">
+        <div className="header-inner">
+          <div className="header-logo">
+            <span className="logo-flame-wrap">
+              <FlameLogo size={22} />
+            </span>
+            <span className="logo-text">Poof</span>
+          </div>
+          <nav className="header-nav">
           {unreadCount > 0 && (
             <span className="header-unread-badge">{unreadCount} new</span>
           )}
-          {GITHUB_URL && (
-            <a
-              href={GITHUB_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="header-link"
-            >
-              <GithubLogo size={15} weight="fill" />
-              <span>GitHub</span>
-              <ArrowRight size={11} />
-            </a>
-          )}
         </nav>
+        </div>
       </header>
 
       <section className="hero">
@@ -163,14 +153,28 @@ export default function Home() {
 
       <footer className="app-footer">
         <div className="footer-inner">
-          <span className="logo-flame-wrap footer-flame">
-            <FlameLogo size={16} />
-          </span>
-          <span className="footer-brand-name">Poof</span>
-          <span className="footer-sep">·</span>
-          <p className="footer-legal">
-            Nothing stored server-side. AES-GCM encrypted in your browser. Burns on command.
-          </p>
+          <div className="footer-left">
+            <span className="logo-flame-wrap footer-flame">
+              <FlameLogo size={16} />
+            </span>
+            <span className="footer-brand-name">Poof</span>
+            <span className="footer-sep">·</span>
+            <p className="footer-legal">
+              Nothing stored server-side. AES-GCM encrypted in your browser. Burns on command.
+            </p>
+          </div>
+          {GITHUB_URL && (
+            <a
+              href={GITHUB_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-link"
+            >
+              <GithubLogo size={14} weight="fill" />
+              <span>GitHub</span>
+              <ArrowRight size={10} />
+            </a>
+          )}
         </div>
       </footer>
     </div>

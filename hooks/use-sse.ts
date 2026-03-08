@@ -21,6 +21,16 @@ export function useSSE({ address, onEmail, onConnected, onDisconnected }: UseSSE
   const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isMounted = useRef(true)
 
+  // Keep latest callbacks in refs so connect() never needs to rebuild when they change
+  const onEmailRef = useRef(onEmail)
+  const onConnectedRef = useRef(onConnected)
+  const onDisconnectedRef = useRef(onDisconnected)
+  useEffect(() => {
+    onEmailRef.current = onEmail
+    onConnectedRef.current = onConnected
+    onDisconnectedRef.current = onDisconnected
+  })
+
   const connect = useCallback(() => {
     if (!address || !isMounted.current) return
 
@@ -28,8 +38,7 @@ export function useSSE({ address, onEmail, onConnected, onDisconnected }: UseSSE
     esRef.current = es
 
     es.onopen = () => {
-      onConnected?.()
-      // Clear any pending reconnect
+      onConnectedRef.current?.()
       if (reconnectTimer.current) {
         clearTimeout(reconnectTimer.current)
         reconnectTimer.current = null
@@ -40,7 +49,7 @@ export function useSSE({ address, onEmail, onConnected, onDisconnected }: UseSSE
       try {
         const data = JSON.parse(e.data)
         if (data.type === "email") {
-          onEmail(data.email as RawIncomingEmail)
+          onEmailRef.current(data.email as RawIncomingEmail)
         }
       } catch {
         // Malformed event — ignore
@@ -49,13 +58,12 @@ export function useSSE({ address, onEmail, onConnected, onDisconnected }: UseSSE
 
     es.onerror = () => {
       es.close()
-      onDisconnected?.()
-      // Auto-reconnect after 3s
+      onDisconnectedRef.current?.()
       if (isMounted.current) {
         reconnectTimer.current = setTimeout(connect, 3000)
       }
     }
-  }, [address, onEmail, onConnected, onDisconnected])
+  }, [address]) // only reconnects when address changes
 
   useEffect(() => {
     isMounted.current = true

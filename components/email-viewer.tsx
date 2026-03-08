@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo } from "react"
 import { StoredEmail } from "@/lib/db"
 import { extractOTPs, extractVerifyLinks, createSandboxedIframeContent } from "@/lib/email-utils"
 import { OTPBadge } from "./otp-badge"
@@ -16,7 +16,6 @@ export function EmailViewer({ email, onBack }: Props) {
   const [viewMode, setViewMode] = useState<"rendered" | "plain">("rendered")
   const [verifying, setVerifying] = useState(false)
   const [verifyResult, setVerifyResult] = useState<string | null>(null)
-  const [iframeSrc, setIframeSrc] = useState("")
 
   const otps = useMemo(() => (email ? extractOTPs(email.textContent || email.htmlContent) : []), [email])
   const verifyLinks = useMemo(() => (email ? extractVerifyLinks(email.htmlContent) : []), [email])
@@ -24,17 +23,6 @@ export function EmailViewer({ email, onBack }: Props) {
     () => (email?.htmlContent ? createSandboxedIframeContent(email.htmlContent) : ""),
     [email]
   )
-
-  useEffect(() => {
-    if (!iframeContent) {
-      setIframeSrc("")
-      return
-    }
-    const blob = new Blob([iframeContent], { type: "text/html" })
-    const url = URL.createObjectURL(blob)
-    setIframeSrc(url)
-    return () => { URL.revokeObjectURL(url) }
-  }, [iframeContent])
 
   const handleOneClickVerify = async (url: string) => {
     setVerifying(true)
@@ -123,9 +111,9 @@ export function EmailViewer({ email, onBack }: Props) {
 
       {/* Email Body */}
       <div className="viewer-body">
-        {viewMode === "rendered" && iframeSrc ? (
+        {viewMode === "rendered" && iframeContent ? (
           <iframe
-            src={iframeSrc}
+            srcDoc={iframeContent}
             sandbox="allow-popups allow-popups-to-escape-sandbox"
             className="viewer-iframe"
             title="Email content"

@@ -14,7 +14,7 @@ interface Props {
 }
 
 const DURATIONS: { label: string; value: BurnDuration; ms: number | null }[] = [
-  { label: "10 min", value: "10min", ms: 10 * 60 * 1000 },
+  { label: "5 min", value: "5min", ms: 5 * 60 * 1000 },
   { label: "1 hour", value: "1hour", ms: 60 * 60 * 1000 },
   { label: "24 hours", value: "24hours", ms: 24 * 60 * 60 * 1000 },
   { label: "∞  Never (we judge you)", value: "never", ms: null },

@@ -12,7 +12,7 @@ export interface DeviceConfig {
   domain: string
   createdAt: number
   burnAt: number | null // epoch ms, null = never
-  burnDuration: "10min" | "1hour" | "24hours" | "never"
+  burnDuration: "5min" | "1hour" | "24hours" | "never"
 }
 
 export interface ArchivedAddress {

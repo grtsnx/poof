@@ -19,10 +19,10 @@ import {
 } from "@/lib/db"
 import { generateEmail } from "@/lib/domains"
 
-export type BurnDuration = "10min" | "1hour" | "24hours" | "never"
+export type BurnDuration = "5min" | "1hour" | "24hours" | "never"
 
 const BURN_DURATIONS: Record<BurnDuration, number | null> = {
-  "10min": 10 * 60 * 1000,
+  "5min": 5 * 60 * 1000,
   "1hour": 60 * 60 * 1000,
   "24hours": 24 * 60 * 60 * 1000,
   never: null,
@@ -254,6 +254,18 @@ export function useEmail(): UseEmailReturn {
     setSelectedEmail(null)
   }, [])
 
+  const clearAllHistory = useCallback(async () => {
+    await Promise.all(
+      archivedAddresses.map(async (a) => {
+        await deleteAllEmailsForAddress(a.email)
+        await deleteArchivedAddress(a.email)
+      })
+    )
+    setArchivedAddresses([])
+    setHistoryAddress(null)
+    setHistoryEmails([])
+  }, [archivedAddresses])
+
   return {
     config,
     emails,
@@ -274,6 +286,7 @@ export function useEmail(): UseEmailReturn {
     viewHistoryAddress,
     removeArchivedAddress,
     clearHistoryView,
+    clearAllHistory,
   }
 }
 

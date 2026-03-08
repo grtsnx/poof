@@ -2,7 +2,7 @@
 
 import { ArchivedAddress, StoredEmail } from "@/lib/db"
 import { formatRelativeTime } from "@/lib/email-utils"
-import { ClockCounterClockwise, Trash, ArrowLeft, EnvelopeSimple } from "@phosphor-icons/react"
+import { ClockCounterClockwise, Trash, ArrowLeft, EnvelopeSimple, FireSimple } from "@phosphor-icons/react"
 
 interface Props {
   archivedAddresses: ArchivedAddress[]
@@ -13,6 +13,7 @@ interface Props {
   onDeleteAddress: (email: string) => Promise<void>
   onSelectEmail: (email: StoredEmail) => void
   onDeleteEmail: (id: string) => Promise<void>
+  onClearAllHistory: () => Promise<void>
   onBack: () => void
 }
 
@@ -25,6 +26,7 @@ export function HistoryPanel({
   onDeleteAddress,
   onSelectEmail,
   onDeleteEmail,
+  onClearAllHistory,
   onBack,
 }: Props) {
   if (archivedAddresses.length === 0) {
@@ -93,7 +95,17 @@ export function HistoryPanel({
         <button className="history-back-link" onClick={onBack}>
           <ArrowLeft size={13} /> Back to inbox
         </button>
-        <span className="inbox-count">{archivedAddresses.length} past address{archivedAddresses.length !== 1 ? "es" : ""}</span>
+        <div className="history-header-right">
+          <span className="inbox-count">{archivedAddresses.length} past address{archivedAddresses.length !== 1 ? "es" : ""}</span>
+          <button
+            className="btn-icon btn-icon--danger history-clear-btn"
+            title="Permanently delete all history"
+            onClick={onClearAllHistory}
+          >
+            <FireSimple weight="bold" size={13} />
+            <span>Clear all</span>
+          </button>
+        </div>
       </div>
       {archivedAddresses.map((addr) => (
         <div

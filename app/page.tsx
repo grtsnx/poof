@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { useEmail } from "@/hooks/use-email"
 import { useSSE } from "@/hooks/use-sse"
 import { EmailAddressBar } from "@/components/email-address-bar"
@@ -8,7 +8,9 @@ import { BurnTimer } from "@/components/burn-timer"
 import { Inbox } from "@/components/inbox"
 import { EmailViewer } from "@/components/email-viewer"
 import { HistoryPanel } from "@/components/history-panel"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { StoredEmail } from "@/lib/db"
+import { getBurnProgress } from "@/lib/email-utils"
 import { Tray, EnvelopeOpen, GithubLogo, ArrowRight } from "@phosphor-icons/react"
 
 const GITHUB_URL = process.env.NEXT_PUBLIC_GITHUB_URL
@@ -23,7 +25,7 @@ function PoofLogo({ size = 22 }: { size?: number }) {
       {/* Flame rising from envelope top-center */}
       <path
         d="M12 2 C11 3.5 9.5 4.5 9.5 6 C9.5 7.4 10.6 8.2 12 8.2 C13.4 8.2 14.5 7.4 14.5 6 C14.5 4.5 13 3.5 12 2Z"
-        fill="#ff5500"
+        fill="var(--logo-flame, #ff5500)"
         opacity="0.9"
       />
     </svg>
@@ -50,11 +52,24 @@ export default function Home() {
     viewHistoryAddress,
     removeArchivedAddress,
     clearHistoryView,
+    clearAllHistory,
   } = useEmail()
 
   const [isConnected, setIsConnected] = useState(false)
   const [mobileTab, setMobileTab] = useState<"inbox" | "viewer">("inbox")
   const [showHistory, setShowHistory] = useState(false)
+  const [burnProgress, setBurnProgress] = useState(0)
+
+  useEffect(() => {
+    if (!config?.burnAt) {
+      setBurnProgress(0)
+      return
+    }
+    const update = () => setBurnProgress(getBurnProgress(config.createdAt, config.burnAt!))
+    update()
+    const t = setInterval(update, 1000)
+    return () => clearInterval(t)
+  }, [config?.burnAt, config?.createdAt])
 
   useSSE({
     address: config?.email ?? null,
@@ -116,6 +131,7 @@ export default function Home() {
             {unreadCount > 0 && (
               <span className="header-unread-badge">{unreadCount} new</span>
             )}
+            <ThemeToggle />
           </nav>
         </div>
       </header>
@@ -136,17 +152,28 @@ export default function Home() {
         </div>
 
         <div className="hero-right">
-          <EmailAddressBar
-            config={config}
-            isLoading={isLoading}
-            onGenerateNew={generateNewEmail}
-          />
-          <BurnTimer
-            config={config}
-            isBurned={isBurned}
-            onSetDuration={setBurnDuration}
-            onBurnNow={burnNow}
-          />
+          <div
+            className={`hero-email-box${config?.burnAt && config.burnAt - Date.now() < 5 * 60 * 1000 && !isBurned ? " hero-email-box--urgent" : ""}`}
+            style={{
+              ["--burn-remaining" as string]:
+                config?.burnAt && !isBurned ? 1 - burnProgress : 0,
+            }}
+          >
+            <div className="hero-email-box-inner">
+              <EmailAddressBar
+                config={config}
+                isLoading={isLoading}
+                onGenerateNew={generateNewEmail}
+                unreadCount={unreadCount}
+              />
+              <BurnTimer
+                config={config}
+                isBurned={isBurned}
+                onSetDuration={setBurnDuration}
+                onBurnNow={burnNow}
+              />
+            </div>
+          </div>
         </div>
       </section>
 
@@ -183,6 +210,7 @@ export default function Home() {
                 onDeleteAddress={removeArchivedAddress}
                 onSelectEmail={handleHistorySelect}
                 onDeleteEmail={removeEmail}
+                onClearAllHistory={clearAllHistory}
                 onBack={handleCloseHistory}
               />
             ) : (
@@ -210,6 +238,8 @@ export default function Home() {
               <PoofLogo size={15} />
             </span>
             <span className="footer-brand-name">Poof</span>
+            <span className="footer-sep">·</span>
+            <span className="footer-legal">© {new Date().getFullYear()}</span>
             <span className="footer-sep">·</span>
             <p className="footer-legal">
               Nothing stored server-side. AES-GCM encrypted in your browser. Burns on command.

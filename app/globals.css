@@ -22,6 +22,7 @@
   --danger-dim: rgba(255, 69, 69, 0.1);
   --success:   #3effa0;
   --warn:      #ffb84d;
+  --logo-flame: #ff5500;
 
   --font-display: var(--font-display, 'Syne', sans-serif);
   --font-mono:    var(--font-mono, 'JetBrains Mono', monospace);
@@ -33,23 +34,102 @@
   --radius-xl: 18px;
 }
 
-/* Light theme */
+/* Light theme — black and white only */
 html.light {
-  --bg:        #fafafa;
-  --bg-2:      #f0f0f0;
-  --bg-3:      #e8e8e8;
+  --bg:        #ffffff;
+  --bg-2:      #f5f5f5;
+  --bg-3:      #ebebeb;
   --bg-4:      #e0e0e0;
   --border:    #d4d4d4;
   --border-2:  #a3a3a3;
-  --text:      #171717;
+  --text:      #000000;
   --text-2:    #525252;
   --text-3:    #737373;
-  --accent:    #7cb342;
-  --accent-2:  #689f38;
-  --accent-dim: rgba(124, 179, 66, 0.12);
-  --accent-glow: 0 0 20px rgba(124, 179, 66, 0.2);
-  --danger:    #dc2626;
-  --danger-dim: rgba(220, 38, 38, 0.1);
+  --accent:    #000000;
+  --accent-2:  #171717;
+  --accent-dim: rgba(0, 0, 0, 0.08);
+  --accent-glow: 0 0 20px rgba(0, 0, 0, 0.12);
+  --danger:    #171717;
+  --danger-dim: rgba(0, 0, 0, 0.06);
+  --success:   #171717;
+  --warn:      #404040;
+  --logo-flame: #000000;
+  /* Keep real colors for blinkers and burn timer only */
+  --accent-live: #65a30d;
+  --burn-warn:  #ea580c;
+  --burn-danger:#dc2626;
+}
+
+html.light .header-unread-badge {
+  color: #fff;
+}
+
+html.light .logo-wrap,
+html.light .logo-flame-wrap,
+html.light .logo-mail-wrap {
+  filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.15));
+}
+
+/* Light: mute email address and other secondary text */
+html.light .address-username,
+html.light .address-domain,
+html.light .address-at {
+  color: var(--text-3);
+}
+
+/* Light: blinkers keep their color */
+html.light .eyebrow-dot {
+  --dot-color: var(--accent-live);
+  background: var(--accent-live);
+  box-shadow: 0 0 8px var(--accent-live);
+}
+html.light .status-live,
+html.light .inbox-live-badge--on {
+  color: var(--accent-live);
+}
+html.light .otp-pulse {
+  --dot-color: var(--accent-live);
+  background: var(--accent-live);
+  box-shadow: 0 0 10px var(--accent-live);
+}
+html.light .inbox-item--unread::before {
+  background: var(--accent-live);
+}
+
+/* Light: burn timer icon and slider keep their color */
+html.light .burn-icon {
+  color: var(--burn-warn);
+  filter: drop-shadow(0 0 6px var(--burn-warn));
+}
+html.light .burn-icon--urgent {
+  color: var(--burn-danger);
+  filter: drop-shadow(0 0 6px var(--burn-danger));
+}
+html.light .burn-progress-fill {
+  background: linear-gradient(90deg, var(--accent-live) 0%, var(--burn-warn) 70%, var(--burn-danger) 100%);
+}
+
+/* Mobile drain border in light: use colored accent/danger */
+html.light .hero-email-box::before {
+  background: conic-gradient(
+    from -90deg,
+    var(--accent-live) 0deg,
+    var(--accent-live) calc(360deg * var(--burn-remaining, 1)),
+    var(--border) calc(360deg * var(--burn-remaining, 1))
+  );
+}
+html.light .hero-email-box.hero-email-box--urgent::before {
+  background: conic-gradient(
+    from -90deg,
+    var(--burn-danger) 0deg,
+    var(--burn-danger) calc(360deg * var(--burn-remaining, 1)),
+    var(--border) calc(360deg * var(--burn-remaining, 1))
+  );
+}
+
+/* Dark theme keeps default (root) values; ensure logo flame stays orange */
+html.dark {
+  --logo-flame: #ff5500;
 }
 
 /* ─── Reset & Base ───────────────────────────────────────────────────── */
@@ -260,15 +340,16 @@ body {
   display: inline-block;
   width: 6px;
   height: 6px;
-  background: var(--accent);
+  --dot-color: var(--accent);
+  background: var(--dot-color);
   border-radius: 50%;
-  box-shadow: 0 0 8px var(--accent);
+  box-shadow: 0 0 8px var(--dot-color);
   animation: dot-pulse 2s ease-in-out infinite;
 }
 
 @keyframes dot-pulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--accent); }
-  50% { opacity: 0.5; box-shadow: 0 0 4px var(--accent); }
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--dot-color); }
+  50% { opacity: 0.5; box-shadow: 0 0 4px var(--dot-color); }
 }
 
 .hero-title {
@@ -299,6 +380,19 @@ body {
 }
 
 .hero-right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Wrapper for address bar + burn timer; on mobile they become one card */
+.hero-email-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hero-email-box-inner {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -465,6 +559,26 @@ body {
   padding: 1px 5px;
   border-radius: 99px;
   line-height: 1.4;
+}
+
+.copy-unread-badge {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .copy-unread-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent);
+    color: #000;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 99px;
+    line-height: 1.4;
+    animation: pulse-badge 2s ease-in-out infinite;
+  }
 }
 
 /* Hidden panel on mobile when opposite tab is active */
@@ -701,6 +815,19 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.history-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.history-clear-btn {
+  font-size: 11px;
+  padding: 3px 9px;
+  min-height: unset;
+  gap: 4px;
 }
 
 .inbox-history-btn {
@@ -1075,9 +1202,10 @@ body {
   display: inline-block;
   width: 7px;
   height: 7px;
-  background: var(--accent);
+  --dot-color: var(--accent);
+  background: var(--dot-color);
   border-radius: 50%;
-  box-shadow: 0 0 10px var(--accent);
+  box-shadow: 0 0 10px var(--dot-color);
   animation: dot-pulse 1.5s ease-in-out infinite;
   flex-shrink: 0;
 }
@@ -1167,6 +1295,7 @@ body {
 /* Viewer Body */
 .viewer-body {
   flex: 1;
+  min-height: 0; /* allows flex child to shrink below content size */
   overflow: hidden;
   position: relative;
 }
@@ -1174,6 +1303,7 @@ body {
 .viewer-iframe {
   width: 100%;
   height: 100%;
+  min-height: 300px; /* fallback when parent height is indeterminate */
   border: none;
   display: block;
 }
@@ -1363,6 +1493,7 @@ body {
 }
 
 .footer-legal {
+  display: inline;
   font-size: 11px;
   color: var(--text-3);
   opacity: 0.6;
@@ -1433,7 +1564,8 @@ body {
     overflow-y: auto;
   }
 
-  .panel-viewer { min-height: 420px; }
+  .panel-viewer { height: 420px; }
+  .viewer { height: 420px; }
 
   .features-section { width: calc(100% - 48px); }
 }
@@ -1496,6 +1628,89 @@ body {
   }
   .burn-countdown { font-size: 16px; }
 
+  /* Mobile only: burn timer inside the email address card */
+  .hero-email-box {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    gap: 0;
+  }
+  .hero-email-box-inner {
+    gap: 0;
+  }
+  /* Mobile: hide the progress bar (slider); progress moves to border around box */
+  .hero-email-box .burn-progress-wrap {
+    display: none;
+  }
+  /* Mobile: draining border around the box (--burn-remaining = 0..1) */
+  .hero-email-box {
+    position: relative;
+    padding: 3px;
+    overflow: visible;
+    border: none;
+    background: transparent;
+  }
+  .hero-email-box::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-lg);
+    padding: 3px;
+    background: conic-gradient(
+      from -90deg,
+      var(--accent) 0deg,
+      var(--accent) calc(360deg * var(--burn-remaining, 1)),
+      var(--border) calc(360deg * var(--burn-remaining, 1))
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .hero-email-box.hero-email-box--urgent::before {
+    background: conic-gradient(
+      from -90deg,
+      var(--danger) 0deg,
+      var(--danger) calc(360deg * var(--burn-remaining, 1)),
+      var(--border) calc(360deg * var(--burn-remaining, 1))
+    );
+  }
+  .hero-email-box-inner {
+    position: relative;
+    z-index: 1;
+    background: var(--bg-2);
+    border-radius: calc(var(--radius-lg) - 2px);
+    overflow: hidden;
+  }
+  .hero-email-box .address-bar-wrap {
+    margin: 0;
+  }
+  .hero-email-box .address-bar {
+    border: none;
+    border-radius: 0;
+    border-bottom: 1px solid var(--border);
+    margin: 0;
+  }
+  .hero-email-box .burn-timer,
+  .hero-email-box .burn-timer--urgent,
+  .hero-email-box .burn-timer--burned {
+    border: none;
+    border-radius: 0;
+    margin: 0;
+    padding: 10px 14px;
+    background: transparent;
+  }
+  .hero-email-box .burn-timer--urgent {
+    background: rgba(255, 69, 69, 0.03);
+  }
+  .hero-email-box .address-bar-skeleton {
+    border: none;
+    border-radius: 0;
+  }
+
   /* Main panel: enable tab switcher */
   .main-panel {
     width: calc(100% - 32px);
@@ -1518,7 +1733,7 @@ body {
     border-bottom: none;
   }
   .panel-viewer {
-    min-height: 440px;
+    height: 440px;
   }
 
   /* Features */

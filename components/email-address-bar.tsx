@@ -8,9 +8,10 @@ interface Props {
   config: DeviceConfig | null
   isLoading: boolean
   onGenerateNew: () => Promise<void>
+  unreadCount?: number
 }
 
-export function EmailAddressBar({ config, isLoading, onGenerateNew }: Props) {
+export function EmailAddressBar({ config, isLoading, onGenerateNew, unreadCount = 0 }: Props) {
   const [copied, setCopied] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
 
@@ -57,6 +58,9 @@ export function EmailAddressBar({ config, isLoading, onGenerateNew }: Props) {
           >
             <Copy weight="bold" size={16} />
             <span>{copied ? "Copied!" : "Copy"}</span>
+            {unreadCount > 0 && (
+              <span className="copy-unread-badge">{unreadCount}</span>
+            )}
           </button>
 
           <button
@@ -70,10 +74,6 @@ export function EmailAddressBar({ config, isLoading, onGenerateNew }: Props) {
           </button>
         </div>
       </div>
-
-      <p className="address-hint">
-        Share it. Spam it. Let it burn.
-      </p>
     </div>
   )
 }

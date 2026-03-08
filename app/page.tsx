@@ -214,6 +214,22 @@ export default function Home() {
             <br />
             <em className="hero-accent">but it burns.</em>
           </h1>
+          {isMobile && (
+            <a
+              href="https://www.producthunt.com/products/poof-7?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-poof-8"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ display: "inline-block", marginBottom: "12px" }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                alt="Poof -  A disposable email that burns itself. | Product Hunt"
+                width="160"
+                height="35"
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1092694&theme=neutral&t=1772976611702"
+              />
+            </a>
+          )}
           <p className="hero-sub">
             Spam-proof with zero regrets. Encrypted locally.
             <br />
@@ -221,6 +237,22 @@ export default function Home() {
             <br />
             but <strong>on purpose.</strong>
           </p>
+          {!isMobile && (
+            <a
+              href="https://www.producthunt.com/products/poof-7?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-poof-8"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ display: "inline-block", marginTop: "12px" }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                alt="Poof -  A disposable email that burns itself. | Product Hunt"
+                width="160"
+                height="35"
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1092694&theme=neutral&t=1772976611702"
+              />
+            </a>
+          )}
         </div>
 
         <div className="hero-right">

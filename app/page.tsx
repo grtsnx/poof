@@ -10,6 +10,9 @@ import { Inbox } from "@/components/inbox"
 import { EmailViewer } from "@/components/email-viewer"
 import { HistoryPanel } from "@/components/history-panel"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { SoundToggle } from "@/components/sound-toggle"
+import { FaviconBadge } from "@/components/favicon-badge"
+import { useNewEmailSound } from "@/hooks/use-new-email-sound"
 import { StoredEmail } from "@/lib/db"
 import { getBurnProgress } from "@/lib/email-utils"
 import {
@@ -75,6 +78,8 @@ export default function Home() {
     clearHistoryView,
     clearAllHistory,
   } = useEmail()
+
+  useNewEmailSound(unreadCount)
 
   const [isConnected, setIsConnected] = useState(false)
   const [mobileTab, setMobileTab] = useState<"inbox" | "viewer">("inbox")
@@ -187,9 +192,11 @@ export default function Home() {
             {unreadCount > 0 && (
               <span className="header-unread-badge">{unreadCount} new</span>
             )}
+            <SoundToggle />
             <ThemeToggle />
           </nav>
         </div>
+        <FaviconBadge count={unreadCount} />
       </header>
 
       <section className={`hero${isBurned ? " hero--burned" : ""}`}>
@@ -222,6 +229,7 @@ export default function Home() {
                 isLoading={isLoading}
                 onGenerateNew={generateNewEmail}
                 unreadCount={unreadCount}
+                isBurned={isBurned}
               >
                 {isMobile && (
                   <BurnTimer

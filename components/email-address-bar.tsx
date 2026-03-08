@@ -10,13 +10,15 @@ interface Props {
   isLoading: boolean
   onGenerateNew: () => Promise<void>
   unreadCount?: number
+  isBurned?: boolean
   children?: ReactNode
 }
 
-export function EmailAddressBar({ config, isLoading, onGenerateNew, unreadCount = 0, children }: Props) {
+export function EmailAddressBar({ config, isLoading, onGenerateNew, unreadCount = 0, isBurned = false, children }: Props) {
   const [copied, setCopied] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const isMobile = useIsMobile()
+  const hideActions = isMobile && isBurned
 
   const copyEmail = useCallback(async () => {
     if (!config) return
@@ -48,11 +50,27 @@ export function EmailAddressBar({ config, isLoading, onGenerateNew, unreadCount 
     <div className="address-bar-wrap">
       <div className="address-bar">
         <div className="address-display">
-          <span className="address-username">{username}</span>
-          <span className="address-at">@</span>
-          <span className="address-domain">{domain}</span>
+          <span className="address-display-email">
+            <span className="address-username">{username}</span>
+            <span className="address-at">@</span>
+            <span className="address-domain">{domain}</span>
+          </span>
+          {hideActions && (
+            <button
+              onClick={handleGenerate}
+              className="address-display-new-btn"
+              title="Generate a new address"
+              disabled={isGenerating}
+              aria-label="Generate new email"
+            >
+              <ArrowClockwise weight="bold" size={18} className={isGenerating ? "spin" : ""} />
+            </button>
+          )}
         </div>
 
+        {hideActions ? (
+          <div className="address-bar-burned-mobile-extra">{children}</div>
+        ) : (
         <div className="address-actions-row">
           {children}
           <div className="address-actions">
@@ -79,6 +97,7 @@ export function EmailAddressBar({ config, isLoading, onGenerateNew, unreadCount 
             </button>
           </div>
         </div>
+        )}
       </div>
     </div>
   )

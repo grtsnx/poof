@@ -325,6 +325,68 @@ body {
   box-shadow: 0 0 0 2px var(--accent-dim);
 }
 
+.sound-toggle-wrap {
+  position: relative;
+}
+
+.sound-toggle.theme-toggle {
+  width: auto;
+  min-width: 36px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.sound-toggle-caret {
+  opacity: 0.7;
+}
+
+.sound-toggle .sound-toggle-caret {
+  margin-left: 2px;
+}
+
+.sound-toggle-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 120px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-lg);
+  padding: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sound-toggle-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  text-align: left;
+}
+
+.sound-toggle-option:hover {
+  background: var(--bg-3);
+  color: var(--text);
+}
+
+.sound-toggle-option--active {
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
 /* ─── Hero ───────────────────────────────────────────────────────────── */
 .hero {
   display: grid;
@@ -459,8 +521,53 @@ body {
   flex: 1;
   min-width: 0;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.address-display-email {
+  min-width: 0;
+  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+
+.address-display-new-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--accent-dim);
+  color: var(--accent);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.address-display-new-btn:hover:not(:disabled) {
+  background: var(--accent);
+  color: var(--bg);
+}
+.address-display-new-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.address-bar-burned-mobile-extra {
+  width: 100%;
+  min-width: 0;
+  margin-top: 4px;
+}
+
+.address-bar:has(.address-bar-burned-mobile-extra) .address-display {
+  flex: 0 1 auto;
 }
 
 .address-username { color: var(--text); }
@@ -663,16 +770,22 @@ body {
 }
 
 .burn-timer--burned-compact {
-  padding: 16px 20px;
-  gap: 10px;
-  align-items: flex-start;
+  width: 100%;
+  min-width: 0;
+  padding: 18px 20px;
+  gap: 12px;
+  align-items: stretch;
   text-align: left;
+  box-sizing: border-box;
 }
 
 .burn-timer--burned-compact .burn-timer--burned-line {
-  font-size: 14px;
+  font-family: var(--font-display);
+  font-size: 15px;
   font-weight: 600;
-  color: var(--text-2);
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--text);
 }
 
 .burn-hint {
@@ -681,16 +794,22 @@ body {
 }
 
 .burn-hint--with-icon {
-  display: inline-flex;
-  align-items: center;
+  display: flex;
+  align-items: flex-start;
   gap: 8px;
-  font-size: 13px;
-  color: var(--text-3);
+  width: 100%;
+  min-width: 0;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--text-2);
 }
 
 .burn-hint--with-icon svg {
   color: var(--accent);
   flex-shrink: 0;
+  margin-top: 2px;
 }
 
 .burn-timer-left {
@@ -1802,6 +1921,10 @@ body {
     padding: 12px 14px;
     min-width: 0;
   }
+  .hero-email-box-inner,
+  .hero-email-box .address-bar-wrap {
+    min-width: 0;
+  }
   .address-bar .address-display {
     font-size: 13px;
     width: 100%;
@@ -1815,13 +1938,14 @@ body {
     flex: 0 0 auto;
     flex-wrap: nowrap;
     overflow-x: auto;
-    min-width: 0;
     -webkit-overflow-scrolling: touch;
-    gap: 16px;
-    justify-content: flex-start;
+    min-width: 0;
+    gap: 10px;
+    justify-content: space-between;
   }
   .address-bar .address-actions-row > * {
     flex-shrink: 0;
+    min-width: 0;
   }
   .address-display {
     font-size: 13px;
@@ -1832,11 +1956,12 @@ body {
     gap: 16px;
   }
   .address-actions-row {
-    justify-content: flex-start;
+    justify-content: space-between;
     flex-wrap: nowrap;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     min-width: 0;
-    gap: 16px;
+    gap: 10px;
   }
   /* Touch-friendly button sizing */
   .btn-icon {

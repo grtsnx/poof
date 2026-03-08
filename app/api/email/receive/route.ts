@@ -41,8 +41,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Bad payload" }, { status: 400 })
   }
 
+  // Only process inbound email.received; acknowledge other events (email.sent, email.delivered, etc.) with 200
   if (body.type !== "email.received" || !body.data?.email_id) {
-    return NextResponse.json({ error: "Expected email.received with data.email_id" }, { status: 400 })
+    return NextResponse.json({ ok: true })
   }
 
   const emailId = body.data.email_id

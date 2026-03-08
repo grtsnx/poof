@@ -40,7 +40,7 @@ A privacy-first disposable email service built with Next.js. Generate a temporar
 | Layer | Technology |
 |---|---|
 | Framework | Next.js 16 (App Router, Turbopack) |
-| UI | HeroUI, Radix UI, shadcn/ui, Tailwind CSS v4 |
+| UI | HeroUI, Tailwind CSS v4 |
 | Icons | Phosphor Icons |
 | Email provider | [Resend](https://resend.com) (inbound webhooks) |
 | Real-time | Server-Sent Events (SSE) + Redis pub/sub (`ioredis`) |
@@ -166,8 +166,6 @@ components/
   theme-provider.tsx
   sound-toggle.tsx              # Optional new-email sound
   favicon-badge.tsx             # Unread count in favicon
-  ui/
-    button.tsx                  # Shared button component
 
 hooks/
   use-email.ts                  # Core state: config, emails, burn logic, history

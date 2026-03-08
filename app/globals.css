@@ -1158,6 +1158,26 @@ body {
   gap: 4px;
 }
 
+.inbox-clear-all-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.inbox-clear-all-icon:hover {
+  background: var(--danger-dim);
+  color: var(--danger);
+}
+
 .inbox-history-btn {
   display: flex;
   align-items: center;

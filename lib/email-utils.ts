@@ -52,25 +52,6 @@ export function extractVerifyLinks(html: string): VerifyLink[] {
   return links
 }
 
-/** Convert HTML email to safe plain text */
-export function htmlToText(html: string): string {
-  return html
-    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
-    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<\/p>/gi, "\n\n")
-    .replace(/<\/div>/gi, "\n")
-    .replace(/<[^>]+>/g, "")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim()
-}
-
 /** Sanitize HTML for safe rendering in a sandboxed iframe */
 export function createSandboxedIframeContent(html: string): string {
   const safe = html
@@ -128,4 +109,11 @@ export function getBurnProgress(createdAt: number, burnAt: number): number {
   const total = burnAt - createdAt
   const elapsed = Date.now() - createdAt
   return Math.min(1, Math.max(0, elapsed / total))
+}
+
+export function formatFrom(from: string): string {
+  const nameMatch = from.match(/^([^<]+)</)
+  if (nameMatch) return nameMatch[1].trim()
+  const domain = from.split("@")[1]
+  return domain ? domain.split(".")[0] : from
 }

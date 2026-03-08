@@ -79,6 +79,7 @@ export default function Home() {
     removeArchivedAddress,
     clearHistoryView,
     clearAllHistory,
+    clearCurrentInbox,
   } = useEmail()
 
   useNewEmailSound(unreadCount)
@@ -333,6 +334,7 @@ export default function Home() {
                 isConnected={isConnected}
                 onOpenHistory={handleOpenHistory}
                 onClearAllHistory={clearAllHistory}
+                onClearCurrentInbox={clearCurrentInbox}
                 historyCount={archivedAddresses.length}
                 showDragHint={!isMobile}
               />

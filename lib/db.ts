@@ -165,23 +165,6 @@ export async function getEmails(address: string): Promise<StoredEmail[]> {
   )
 }
 
-export async function getEmail(id: string): Promise<StoredEmail | undefined> {
-  const db = await getDB()
-  const email = await db.get("emails", id)
-  if (!email) return undefined
-  return {
-    ...email,
-    htmlContent: await decrypt(email.htmlContent).catch(() => email.textContent),
-    textContent: await decrypt(email.textContent).catch(() => ""),
-  }
-}
-
-export async function getEmailCountForAddress(address: string): Promise<number> {
-  const db = await getDB()
-  const emails = await db.getAllFromIndex("emails", "by-address", address.toLowerCase())
-  return emails.length
-}
-
 export async function markEmailRead(id: string): Promise<void> {
   const db = await getDB()
   const email = await db.get("emails", id)

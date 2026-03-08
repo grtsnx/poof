@@ -1,7 +1,7 @@
 "use client"
 
 import { ArchivedAddress, StoredEmail } from "@/lib/db"
-import { formatRelativeTime } from "@/lib/email-utils"
+import { formatRelativeTime, formatFrom } from "@/lib/email-utils"
 import { ClockCounterClockwise, Trash, ArrowLeft, EnvelopeSimple, FireSimple } from "@phosphor-icons/react"
 
 interface Props {
@@ -145,9 +145,3 @@ export function HistoryPanel({
   )
 }
 
-function formatFrom(from: string): string {
-  const nameMatch = from.match(/^([^<]+)</)
-  if (nameMatch) return nameMatch[1].trim()
-  const domain = from.split("@")[1]
-  return domain ? domain.split(".")[0] : from
-}

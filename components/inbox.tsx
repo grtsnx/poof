@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { StoredEmail } from "@/lib/db"
-import { formatRelativeTime, extractOTPs } from "@/lib/email-utils"
+import { formatRelativeTime, extractOTPs, formatFrom } from "@/lib/email-utils"
 import { EnvelopeSimple, EnvelopeOpen, Trash, Key, Link, ClockCounterClockwise, FireSimple, Copy, Check } from "@phosphor-icons/react"
 
 interface Props {
@@ -13,11 +13,12 @@ interface Props {
   isConnected: boolean
   onOpenHistory: () => void
   onClearAllHistory: () => Promise<void>
+  onClearCurrentInbox: () => Promise<void>
   historyCount: number
   showDragHint?: boolean
 }
 
-export function Inbox({ emails, selectedId, onSelect, onDelete, isConnected, onOpenHistory, onClearAllHistory, historyCount, showDragHint = false }: Props) {
+export function Inbox({ emails, selectedId, onSelect, onDelete, isConnected, onOpenHistory, onClearAllHistory, onClearCurrentInbox, historyCount, showDragHint = false }: Props) {
   if (emails.length === 0) {
     return (
       <div className="inbox-empty">
@@ -76,6 +77,16 @@ export function Inbox({ emails, selectedId, onSelect, onDelete, isConnected, onO
           <span className={`inbox-live-badge ${isConnected ? "inbox-live-badge--on" : ""}`}>
             {isConnected ? "● LIVE" : "◌"}
           </span>
+          {emails.length > 0 && (
+            <button
+              className="inbox-clear-all-icon"
+              title="Delete all messages in inbox"
+              onClick={onClearCurrentInbox}
+              aria-label="Delete all messages in inbox"
+            >
+              <Trash size={14} weight="bold" />
+            </button>
+          )}
           <button className="inbox-history-btn" onClick={onOpenHistory} title="View past addresses">
             <ClockCounterClockwise size={13} />
             {historyCount > 0 ? historyCount : ""}
@@ -126,13 +137,6 @@ export function Inbox({ emails, selectedId, onSelect, onDelete, isConnected, onO
       ))}
     </div>
   )
-}
-
-function formatFrom(from: string): string {
-  const nameMatch = from.match(/^([^<]+)</)
-  if (nameMatch) return nameMatch[1].trim()
-  const domain = from.split("@")[1]
-  return domain ? domain.split(".")[0] : from
 }
 
 function InboxOTPCopy({ email }: { email: StoredEmail }) {

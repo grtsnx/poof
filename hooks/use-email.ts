@@ -50,6 +50,7 @@ interface UseEmailReturn {
   removeArchivedAddress: (email: string) => Promise<void>
   clearHistoryView: () => void
   clearAllHistory: () => Promise<void>
+  clearCurrentInbox: () => Promise<void>
 }
 
 export interface RawIncomingEmail {
@@ -272,6 +273,14 @@ export function useEmail(): UseEmailReturn {
     setHistoryEmails([])
   }, [archivedAddresses])
 
+  const clearCurrentInbox = useCallback(async () => {
+    if (!config) return
+    await deleteAllEmailsForAddress(config.email)
+    setEmails([])
+    setUnreadCount(0)
+    setSelectedEmail(null)
+  }, [config])
+
   return {
     config,
     emails,
@@ -294,6 +303,7 @@ export function useEmail(): UseEmailReturn {
     removeArchivedAddress,
     clearHistoryView,
     clearAllHistory,
+    clearCurrentInbox,
   }
 }
 

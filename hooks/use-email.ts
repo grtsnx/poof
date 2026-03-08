@@ -48,6 +48,7 @@ interface UseEmailReturn {
   viewHistoryAddress: (email: string) => Promise<void>
   removeArchivedAddress: (email: string) => Promise<void>
   clearHistoryView: () => void
+  clearAllHistory: () => Promise<void>
 }
 
 export interface RawIncomingEmail {

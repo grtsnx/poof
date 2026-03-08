@@ -339,7 +339,8 @@ body {
 }
 
 .hero--burned {
-  grid-template-columns: 0fr 1fr;
+  /* Keep both columns visible; optional: narrow the left for emphasis on the right */
+  grid-template-columns: 1fr 1fr;
   align-items: center;
 }
 
@@ -355,11 +356,6 @@ body {
   overflow: hidden;
   min-width: 0;
   transition: opacity 0.25s ease;
-}
-
-.hero--burned .hero-left {
-  opacity: 0;
-  pointer-events: none;
 }
 
 .hero-eyebrow {
@@ -664,6 +660,37 @@ body {
   padding: 24px;
   gap: 6px;
   border-color: var(--danger-dim);
+}
+
+.burn-timer--burned-compact {
+  padding: 16px 20px;
+  gap: 10px;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.burn-timer--burned-compact .burn-timer--burned-line {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.burn-hint {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.burn-hint--with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.burn-hint--with-icon svg {
+  color: var(--accent);
+  flex-shrink: 0;
 }
 
 .burn-timer-left {

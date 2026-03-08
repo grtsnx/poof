@@ -246,8 +246,7 @@ export default function Home() {
         </div>
       </section>
 
-      {!isBurned && (
-        <main
+      <main
           className="main-panel"
           style={{ gridTemplateColumns: `${inboxWidth}px 4px 1fr` }}
         >
@@ -311,7 +310,6 @@ export default function Home() {
             />
           </section>
         </main>
-      )}
 
       <footer className="app-footer">
         <div className="footer-inner">

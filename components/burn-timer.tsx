@@ -5,7 +5,7 @@ import { createPortal } from "react-dom"
 import { DeviceConfig } from "@/lib/db"
 import { BurnDuration } from "@/hooks/use-email"
 import { formatCountdown, getBurnProgress } from "@/lib/email-utils"
-import { Fire, Timer } from "@phosphor-icons/react"
+import { Fire, Timer, ArrowClockwise } from "@phosphor-icons/react"
 
 const MOBILE_BREAKPOINT = 640
 
@@ -97,7 +97,17 @@ export function BurnTimer({ config, isBurned, onSetDuration, onBurnNow, compact 
   }, [showOptions, isMobile])
 
   if (isBurned) {
-    if (compact) return null
+    if (compact) {
+      return (
+        <div className="burn-timer burn-timer--burned burn-timer--burned-compact">
+          <span className="burn-timer--burned-line">This address has been reduced to ash.</span>
+          <span className="burn-hint burn-hint--with-icon">
+            <ArrowClockwise size={16} weight="bold" />
+            Generate a new one above. It&apos;s free. We checked.
+          </span>
+        </div>
+      )
+    }
     return (
       <div className="burn-timer burn-timer--burned">
         <Fire weight="fill" className="burn-icon burn-icon--dead" />

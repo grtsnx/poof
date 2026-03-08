@@ -18,19 +18,19 @@ export async function POST(req: NextRequest) {
   const rawBody = await req.text()
 
   const secret = process.env.WEBHOOK_SECRET ?? process.env.RESEND_WEBHOOK_SECRET
-  if (secret) {
+  // Only verify when the request includes Svix headers (Resend sends these when a signing secret is set)
+  const hasSvixHeaders =
+    req.headers.get("svix-id") &&
+    req.headers.get("svix-timestamp") &&
+    req.headers.get("svix-signature")
+
+  if (secret && hasSvixHeaders) {
     const id = req.headers.get("svix-id")
     const timestamp = req.headers.get("svix-timestamp")
     const signature = req.headers.get("svix-signature")
-    if (!id || !timestamp || !signature) {
-      return NextResponse.json(
-        { error: "Missing Svix headers (svix-id, svix-timestamp, svix-signature)" },
-        { status: 401 }
-      )
-    }
     try {
       const wh = new Webhook(secret)
-      wh.verify(rawBody, { "svix-id": id, "svix-timestamp": timestamp, "svix-signature": signature })
+      wh.verify(rawBody, { "svix-id": id!, "svix-timestamp": timestamp!, "svix-signature": signature! })
     } catch {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }

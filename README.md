@@ -123,8 +123,15 @@ For production, use a hosted Redis service such as [Upstash](https://upstash.com
 
 1. Go to **Resend → Domains → your domain → Inbound**
 2. Add the MX record Resend provides
-3. Set the webhook URL to `https://yourapp.com/api/email/receive`
-4. Optionally set a webhook secret and add it to `WEBHOOK_SECRET`
+3. Set the **webhook URL** to your app base URL + `/api/email/receive`:
+   ```text
+   https://yourapp.com/api/email/receive
+   ```
+   For local development with ngrok, use your tunnel URL:
+   ```text
+   https://your-subdomain.ngrok-free.app/api/email/receive
+   ```
+4. To verify webhook signatures (recommended in production), copy the **signing secret** from Resend’s webhook settings (it starts with `whsec_`) into `WEBHOOK_SECRET` or `RESEND_WEBHOOK_SECRET`. Leave empty to skip verification (e.g. for local testing).
 
 ### 5. Run locally
 
@@ -182,7 +189,9 @@ lib/
 
 ### `POST /api/email/receive`
 
-Resend inbound webhook. Validates the payload and publishes the email to the Redis channel for the recipient address. All connected SSE streams subscribed to that channel receive the event.
+Resend inbound webhook. **URL:** `https://<your-app-url>/api/email/receive`
+
+Validates the payload and publishes the email to the Redis channel for the recipient address. All connected SSE streams subscribed to that channel receive the event.
 
 **Response:**
 ```json

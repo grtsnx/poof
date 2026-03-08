@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "NODE_OPTIONS='--disable-warning=DEP0169' next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "app/api/email/stream/[address]/route.ts": {
+      "maxDuration": 300
+    }
+  }
+}

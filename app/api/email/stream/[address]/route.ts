@@ -3,13 +3,20 @@
  * Server-Sent Events endpoint for real-time email delivery.
  * Each client subscribes to a Redis channel so emails arrive regardless
  * of which server instance handles the inbound webhook.
+ *
+ * Vercel serverless has a 300s max duration; we close the stream before that
+ * so the client reconnects seamlessly (useSSE already reconnects on close).
  */
 
 import { NextRequest } from "next/server"
 import { createSubscriber, emailChannel } from "@/lib/redis"
 
+/** Close connection before Vercel's 300s timeout so client can reconnect. */
+const MAX_STREAM_SECONDS = 240
+
 export const dynamic = "force-dynamic"
 export const runtime = "nodejs"
+export const maxDuration = 300
 
 export async function GET(
   req: NextRequest,
@@ -47,8 +54,21 @@ export async function GET(
         }
       }, 25000)
 
+      // Close before Vercel 300s timeout; client will reconnect via useSSE
+      const maxTimer = setTimeout(() => {
+        clearInterval(heartbeat)
+        subscriber.unsubscribe(channel).then(() => subscriber.quit()).catch(() => {})
+        try {
+          controller.enqueue(encoder.encode(": reconnect\n\n"))
+          controller.close()
+        } catch {
+          // Already closed
+        }
+      }, MAX_STREAM_SECONDS * 1000)
+
       // Cleanup on client disconnect
       req.signal.addEventListener("abort", () => {
+        clearTimeout(maxTimer)
         clearInterval(heartbeat)
         subscriber.unsubscribe(channel).then(() => subscriber.quit()).catch(() => {})
         try {

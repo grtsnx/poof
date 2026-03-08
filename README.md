@@ -234,13 +234,17 @@ The server never persists email content. Redis is used solely as a pub/sub messa
 ## Scripts
 
 ```bash
-pnpm dev       # Start dev server with Turbopack
+pnpm dev       # Start dev server with Turbopack (suppresses Node deprecation warnings)
 pnpm build     # Production build
 pnpm start     # Start production server
 pnpm lint      # ESLint
 pnpm format    # Prettier
 pnpm typecheck # TypeScript type check
 ```
+
+If you see a `DEP0169 url.parse()` deprecation warning, it comes from a dependency (e.g. Next.js or a transitive package). The dev script sets `NODE_OPTIONS=--no-deprecation` to hide it. To show it again (e.g. to trace the source), run `node --trace-deprecation ./node_modules/.bin/next dev --turbopack`.
+
+**Vercel:** The SSE stream route (`/api/email/stream/[address]`) closes the connection after 4 minutes so it never hits Vercel’s 300s serverless limit; the client reconnects automatically. To suppress the DEP0169 warning on Vercel, set the environment variable `NODE_OPTIONS` = `--no-deprecation` in your project’s Environment Variables (Settings → Environment Variables).
 
 ## Contributing
 

@@ -142,11 +142,23 @@ function InboxOTPCopy({ email }: { email: StoredEmail }) {
 
   const handleCopy = (e: React.MouseEvent) => {
     e.stopPropagation()
+    e.preventDefault()
     const text = otps.length === 1 ? otps[0] : otps.join(", ")
-    void navigator.clipboard.writeText(text).then(() => {
+
+    const doCopy = () => {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-    })
+    }
+
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).then(doCopy).catch(() => {
+        fallbackCopy(text)
+        doCopy()
+      })
+    } else {
+      fallbackCopy(text)
+      doCopy()
+    }
   }
 
   return (
@@ -156,13 +168,32 @@ function InboxOTPCopy({ email }: { email: StoredEmail }) {
       onClick={handleCopy}
       title={otps.length === 1 ? `Copy ${otps[0]}` : `Copy ${otps.length} codes`}
     >
-      <Key size={10} weight="fill" />
-      <span className="inbox-otp-copy-code">{otps[0]}</span>
       {copied ? (
-        <Check size={10} weight="bold" className="inbox-otp-copy-icon" />
+        <>
+          <Check size={10} weight="bold" className="inbox-otp-copy-icon" />
+          <span className="inbox-otp-copy-label">Copied</span>
+        </>
       ) : (
-        <Copy size={10} className="inbox-otp-copy-icon" />
+        <>
+          <Key size={10} weight="fill" />
+          <span className="inbox-otp-copy-code">{otps[0]}</span>
+          <Copy size={10} className="inbox-otp-copy-icon" />
+        </>
       )}
     </button>
   )
+}
+
+function fallbackCopy(text: string) {
+  const ta = document.createElement("textarea")
+  ta.value = text
+  ta.style.position = "fixed"
+  ta.style.opacity = "0"
+  document.body.appendChild(ta)
+  ta.select()
+  try {
+    document.execCommand("copy")
+  } finally {
+    document.body.removeChild(ta)
+  }
 }

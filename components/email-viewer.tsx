@@ -5,7 +5,7 @@ import { useIsMobile } from "@/hooks/use-is-mobile"
 import { StoredEmail } from "@/lib/db"
 import { extractVerifyLinks, createSandboxedIframeContent } from "@/lib/email-utils"
 import { formatRelativeTime } from "@/lib/email-utils"
-import { ArrowSquareOut, Paperclip, Eye, Code, ArrowLeft } from "@phosphor-icons/react"
+import { ArrowSquareOut, Paperclip, Eye, Code, ArrowLeft, X } from "@phosphor-icons/react"
 
 interface Props {
   email: StoredEmail | null
@@ -86,6 +86,16 @@ export function EmailViewer({ email, onBack }: Props) {
           </div>
         </div>
         <div className="viewer-controls">
+          {onBack && (
+            <button
+              type="button"
+              className="view-toggle view-close-btn"
+              onClick={onBack}
+              title="Close email"
+            >
+              <X size={14} weight="bold" />
+            </button>
+          )}
           <button
             className={`view-toggle ${viewMode === "rendered" ? "view-toggle--active" : ""}`}
             onClick={() => setViewMode("rendered")}

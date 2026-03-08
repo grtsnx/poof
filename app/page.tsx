@@ -72,6 +72,7 @@ export default function Home() {
     setBurnDuration,
     selectEmail,
     removeEmail,
+    clearSelection,
     burnNow,
     addEmailFromSSE,
     viewHistoryAddress,
@@ -176,6 +177,11 @@ export default function Home() {
     },
     [viewHistoryAddress, clearHistoryView]
   )
+
+  const handleCloseEmailView = useCallback(() => {
+    clearSelection()
+    setMobileTab("inbox")
+  }, [clearSelection])
 
   return (
     <div className="app">
@@ -300,7 +306,7 @@ export default function Home() {
                 <ClockCounterClockwise size={14} />
                 History
                 {archivedAddresses.length > 0 && (
-                  <span className="panel-inbox-tab-badge">{archivedAddresses.length}</span>
+                  <span className="panel-inbox-tab-badge panel-inbox-tab-badge--neutral">{archivedAddresses.length}</span>
                 )}
               </button>
             </div>
@@ -338,7 +344,7 @@ export default function Home() {
           >
             <EmailViewer
               email={selectedEmail}
-              onBack={() => setMobileTab("inbox")}
+              onBack={handleCloseEmailView}
             />
           </section>
         </main>

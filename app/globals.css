@@ -627,6 +627,7 @@ body {
   color: var(--text-2);
   background: var(--bg-3);
   border: 1px solid var(--border);
+  border-image: none;
   border-radius: var(--radius);
   padding: 6px 12px;
   cursor: pointer;
@@ -1015,6 +1016,11 @@ body {
   color: var(--accent);
 }
 
+.panel-inbox-tab-badge--neutral {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
 .panel-inbox > .history-empty,
 .panel-inbox > .history-list,
 .panel-inbox > .inbox-list,
@@ -1108,7 +1114,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px 14px 10px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
@@ -1416,6 +1422,21 @@ body {
   color: var(--success);
 }
 
+.inbox-otp-copy-label {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--success);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 640px) {
+  .inbox-otp-copy-label {
+    display: none;
+  }
+}
+
 .inbox-badge--link {
   color: #60a5fa;
   background: rgba(96,165,250,0.08);
@@ -1540,7 +1561,7 @@ body {
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  padding: 20px 24px 16px;
+  padding: 16px 12px 12px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -1581,6 +1602,10 @@ body {
   display: flex;
   gap: 4px;
   flex-shrink: 0;
+}
+
+.view-close-btn {
+  margin-left: 4px;
 }
 
 .view-toggle {
@@ -1677,7 +1702,7 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 24px 0;
+  padding: 12px 12px 0;
   flex-wrap: wrap;
 }
 
@@ -1712,16 +1737,20 @@ body {
 /* Viewer Body */
 .viewer-body {
   flex: 1 1 0%;
-  min-height: 0;
+  min-height: 100vh;
   overflow: auto;
   position: relative;
   background: var(--bg);
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
 }
 
 .viewer-iframe {
   width: 100%;
+  min-width: 100%;
   flex: 1 1 0%;
   min-height: 0;
   border: none;
@@ -1734,17 +1763,19 @@ body {
   font-size: 13px;
   color: var(--text-2);
   line-height: 1.7;
-  padding: 20px 24px;
+  padding: 20px 12px;
   white-space: pre-wrap;
   word-break: break-word;
   overflow-y: auto;
   flex: 1 1 0%;
   min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Attachments */
 .viewer-attachments {
-  padding: 12px 24px 20px;
+  padding: 12px 12px 20px;
   border-top: 1px solid var(--border);
 }
 
@@ -2025,6 +2056,17 @@ body {
   .address-actions {
     gap: 8px;
     justify-content: flex-end;
+  }
+  /* Viewer iframe fills available height on desktop */
+  .viewer-body {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .viewer-iframe {
+    flex: 1 1 0%;
+    min-height: 0;
+    height: 100%;
   }
 }
 

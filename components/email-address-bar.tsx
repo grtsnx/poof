@@ -3,7 +3,7 @@
 import { useState, useCallback, type ReactNode } from "react"
 import { DeviceConfig } from "@/lib/db"
 import { useIsMobile } from "@/hooks/use-is-mobile"
-import { Copy, ArrowClockwise } from "@phosphor-icons/react"
+import { Copy, ArrowClockwise, Check } from "@phosphor-icons/react"
 
 interface Props {
   config: DeviceConfig | null
@@ -22,7 +22,21 @@ export function EmailAddressBar({ config, isLoading, onGenerateNew, unreadCount 
 
   const copyEmail = useCallback(async () => {
     if (!config) return
-    await navigator.clipboard.writeText(config.email)
+    try {
+      await navigator.clipboard.writeText(config.email)
+    } catch {
+      const ta = document.createElement("textarea")
+      ta.value = config.email
+      ta.style.position = "fixed"
+      ta.style.opacity = "0"
+      document.body.appendChild(ta)
+      ta.select()
+      try {
+        document.execCommand("copy")
+      } finally {
+        document.body.removeChild(ta)
+      }
+    }
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }, [config])
@@ -77,11 +91,15 @@ export function EmailAddressBar({ config, isLoading, onGenerateNew, unreadCount 
             <button
               onClick={copyEmail}
               className={`btn-icon ${copied ? "btn-icon--success" : ""}`}
-              title={copied ? "Nommed!" : "Copy email"}
+              title={copied ? "Copied!" : "Copy email"}
             >
-              <Copy weight="bold" size={16} />
+              {copied ? (
+                <Check weight="bold" size={16} />
+              ) : (
+                <Copy weight="bold" size={16} />
+              )}
               <span className="btn-icon-label">{copied ? "Copied!" : "Copy"}</span>
-              {unreadCount > 0 && (
+              {unreadCount > 0 && !copied && (
                 <span className="copy-unread-badge">{unreadCount}</span>
               )}
             </button>

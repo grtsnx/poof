@@ -42,6 +42,7 @@ interface UseEmailReturn {
   setBurnDuration: (duration: BurnDuration) => Promise<void>
   selectEmail: (email: StoredEmail) => void
   removeEmail: (id: string) => Promise<void>
+  clearSelection: () => void
   burnNow: () => Promise<void>
   refreshEmails: () => Promise<void>
   addEmailFromSSE: (raw: RawIncomingEmail) => Promise<void>
@@ -178,6 +179,10 @@ export function useEmail(): UseEmailReturn {
     }
   }, [])
 
+  const clearSelection = useCallback(() => {
+    setSelectedEmail(null)
+  }, [])
+
   const removeEmail = useCallback(async (id: string) => {
     await deleteEmail(id)
     setEmails((prev) => prev.filter((e) => e.id !== id))
@@ -281,6 +286,7 @@ export function useEmail(): UseEmailReturn {
     setBurnDuration,
     selectEmail: (email: StoredEmail) => { selectEmail(email) },
     removeEmail,
+    clearSelection,
     burnNow,
     refreshEmails,
     addEmailFromSSE,

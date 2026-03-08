@@ -730,9 +730,11 @@ body {
   }
 }
 
-/* Hidden panel on mobile when opposite tab is active */
-.panel-mobile-hidden {
-  display: none !important;
+/* Hidden panel on mobile when opposite tab is active (only on small screens) */
+@media (max-width: 640px) {
+  .panel-mobile-hidden {
+    display: none !important;
+  }
 }
 
 /* ─── Burn Timer ─────────────────────────────────────────────────────── */
@@ -947,7 +949,9 @@ body {
 .main-panel {
   display: grid;
   grid-template-columns: 320px 4px 1fr;
-  height: 580px;
+  grid-template-rows: min-content minmax(0, 1fr);
+  height: calc(100vh - 140px);
+  min-height: 580px;
   max-width: 1200px;
   margin: 0 auto 48px;
   width: calc(100% - 96px);
@@ -959,17 +963,80 @@ body {
 
 /* ─── Inbox ──────────────────────────────────────────────────────────── */
 .panel-inbox {
-  overflow-y: auto;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  align-self: stretch;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.panel-inbox-tabs {
+  display: flex;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+}
+
+.panel-inbox-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-3);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.panel-inbox-tab:hover {
+  color: var(--text-2);
+  background: var(--surface-2);
+}
+
+.panel-inbox-tab--active {
+  color: var(--text);
+  background: var(--bg-3);
+}
+
+.panel-inbox-tab-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 99px;
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.panel-inbox > .history-empty,
+.panel-inbox > .history-list,
+.panel-inbox > .inbox-list,
+.panel-inbox > .inbox-empty {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
 }
 
 .panel-divider {
+  grid-column: 2;
+  grid-row: 1 / -1;
+  width: 4px;
+  min-width: 4px;
+  max-width: 4px;
   cursor: col-resize;
   background: var(--border);
   transition: background 0.15s;
   position: relative;
-  z-index: 1;
+  z-index: 0;
+  border: none;
+  border-image: none;
 }
 .panel-divider:hover,
 .panel-divider:active {
@@ -1216,7 +1283,15 @@ body {
   font-size: 12px;
 }
 
-.inbox-list { display: flex; flex-direction: column; }
+.inbox-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0%;
+  min-height: 0;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
 
 .inbox-item {
   display: flex;
@@ -1351,24 +1426,30 @@ body {
 
 /* ─── Email Viewer ───────────────────────────────────────────────────── */
 .panel-viewer {
-  overflow-y: auto;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  background: var(--bg-2);
+  min-height: 0;
+  align-self: stretch;
+  height: 100%;
+}
+
+.panel-viewer .viewer-empty {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 40px;
 }
 
 .panel-viewer::-webkit-scrollbar { width: 4px; }
 .panel-viewer::-webkit-scrollbar-track { background: transparent; }
 .panel-viewer::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 99px; }
-
-.viewer-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  gap: 16px;
-  padding: 40px;
-}
 
 .viewer-empty-art {
   font-family: var(--font-mono);
@@ -1417,6 +1498,10 @@ body {
 .viewer {
   display: flex;
   flex-direction: column;
+  flex: 1 1 0%;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--bg-2);
   height: 100%;
 }
 
@@ -1596,18 +1681,22 @@ body {
 
 /* Viewer Body */
 .viewer-body {
-  flex: 1;
-  min-height: 0; /* allows flex child to shrink below content size */
-  overflow: hidden;
+  flex: 1 1 0%;
+  min-height: 0;
+  overflow: auto;
   position: relative;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
 }
 
 .viewer-iframe {
   width: 100%;
-  height: 100%;
-  min-height: 300px; /* fallback when parent height is indeterminate */
+  flex: 1 1 0%;
+  min-height: 0;
   border: none;
   display: block;
+  align-self: stretch;
 }
 
 .viewer-plain {
@@ -1619,7 +1708,8 @@ body {
   white-space: pre-wrap;
   word-break: break-word;
   overflow-y: auto;
-  height: 100%;
+  flex: 1 1 0%;
+  min-height: 0;
 }
 
 /* Attachments */
@@ -1855,20 +1945,40 @@ body {
 
   .main-panel {
     grid-template-columns: 1fr !important;
-    height: auto;
+    grid-template-rows: min-content minmax(0, 1fr);
+    height: calc(100vh - 140px);
+    min-height: 580px;
     width: calc(100% - 48px);
   }
 
-  .panel-divider { display: none; }
-
-  .panel-inbox {
-    border-bottom: 1px solid var(--border);
-    max-height: 320px;
-    overflow-y: auto;
+  .mobile-tabs {
+    display: flex;
   }
 
-  .panel-viewer { height: 420px; }
-  .viewer { height: 420px; }
+  .panel-divider { display: none; grid-row: 2; }
+
+  .panel-inbox {
+    grid-row: 2;
+    min-height: 0;
+    height: 100%;
+    align-self: stretch;
+    border-bottom: none;
+    max-height: none;
+    overflow: hidden;
+  }
+
+  .panel-viewer {
+    grid-row: 2;
+    min-height: 0;
+    height: 100%;
+    align-self: stretch;
+  }
+  .panel-viewer .viewer { flex: 1 1 0%; min-height: 0; height: 100%; }
+
+  /* On tablet, hide the inactive panel so the active one fills the row */
+  .panel-mobile-hidden {
+    display: none !important;
+  }
 
   .features-section { width: calc(100% - 48px); }
 }
@@ -2094,14 +2204,16 @@ body {
     overflow: hidden;
   }
 
-  /* When tab is active, remove the max-height restriction */
+  /* When tab is active, panels fill the grid row */
   .panel-inbox {
     max-height: none;
-    height: 440px;
+    height: 100%;
+    min-height: 0;
     border-bottom: none;
   }
   .panel-viewer {
-    height: 440px;
+    height: 100%;
+    min-height: 0;
   }
 
   /* Features */

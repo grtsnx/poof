@@ -9,6 +9,7 @@ interface Props {
   historyAddress: string | null
   historyEmails: StoredEmail[]
   selectedId: string | null
+  isLoading?: boolean
   onViewAddress: (email: string) => Promise<void>
   onDeleteAddress: (email: string) => Promise<void>
   onSelectEmail: (email: StoredEmail) => void
@@ -22,6 +23,7 @@ export function HistoryPanel({
   historyAddress,
   historyEmails,
   selectedId,
+  isLoading = false,
   onViewAddress,
   onDeleteAddress,
   onSelectEmail,
@@ -29,6 +31,18 @@ export function HistoryPanel({
   onClearAllHistory,
   onBack,
 }: Props) {
+  if (isLoading) {
+    return (
+      <div className="history-empty">
+        <ClockCounterClockwise size={36} weight="thin" className="animate-pulse" />
+        <p className="history-empty-title">Loading history…</p>
+        <button className="history-back-link" onClick={onBack}>
+          <ArrowLeft size={13} /> Back to inbox
+        </button>
+      </div>
+    )
+  }
+
   if (archivedAddresses.length === 0) {
     return (
       <div className="history-empty">

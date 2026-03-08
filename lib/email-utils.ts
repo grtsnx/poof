@@ -87,7 +87,7 @@ export function createSandboxedIframeContent(html: string): string {
   <base target="_blank">
   <style>
     * { box-sizing: border-box; }
-    body { font-family: system-ui, sans-serif; margin: 16px; color: #1a1a1a; line-height: 1.6; }
+    body { font-family: system-ui, sans-serif; margin: 16px; color: #1a1a1a; background: #fff; line-height: 1.6; }
     img { max-width: 100%; height: auto; }
     a { color: #5b8af5; }
   </style>

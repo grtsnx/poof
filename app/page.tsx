@@ -20,6 +20,7 @@ import {
   EnvelopeOpen,
   GithubLogo,
   ArrowRight,
+  ClockCounterClockwise,
 } from "@phosphor-icons/react"
 
 const GITHUB_URL = process.env.NEXT_PUBLIC_GITHUB_URL
@@ -281,12 +282,35 @@ export default function Home() {
           <aside
             className={`panel-inbox ${mobileTab === "viewer" ? "panel-mobile-hidden" : ""}`}
           >
+            <div className="panel-inbox-tabs">
+              <button
+                className={`panel-inbox-tab ${!showHistory ? "panel-inbox-tab--active" : ""}`}
+                onClick={() => setShowHistory(false)}
+              >
+                <Tray size={14} />
+                Inbox
+                {unreadCount > 0 && (
+                  <span className="panel-inbox-tab-badge">{unreadCount}</span>
+                )}
+              </button>
+              <button
+                className={`panel-inbox-tab ${showHistory ? "panel-inbox-tab--active" : ""}`}
+                onClick={() => setShowHistory(true)}
+              >
+                <ClockCounterClockwise size={14} />
+                History
+                {archivedAddresses.length > 0 && (
+                  <span className="panel-inbox-tab-badge">{archivedAddresses.length}</span>
+                )}
+              </button>
+            </div>
             {showHistory ? (
               <HistoryPanel
                 archivedAddresses={archivedAddresses}
                 historyAddress={historyAddress}
                 historyEmails={historyEmails}
                 selectedId={selectedEmail?.id ?? null}
+                isLoading={isLoading}
                 onViewAddress={handleViewHistoryAddress}
                 onDeleteAddress={removeArchivedAddress}
                 onSelectEmail={handleHistorySelect}

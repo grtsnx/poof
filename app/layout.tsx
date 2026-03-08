@@ -1,4 +1,4 @@
-import { Syne, JetBrains_Mono } from "next/font/google"
+import { Syne, JetBrains_Mono, Caveat } from "next/font/google"
 import "./globals.css"
 import { cn } from "@/lib/utils"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -15,6 +15,12 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["300", "400", "500", "600"],
 })
 
+const caveat = Caveat({
+  subsets: ["latin"],
+  variable: "--font-handwritten",
+  weight: ["400", "500", "600", "700"],
+})
+
 export const metadata = {
   title: "Poof — Self-Destructing Email",
   description:
@@ -29,7 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={cn(syne.variable, jetbrainsMono.variable)}
+      className={cn(syne.variable, jetbrainsMono.variable, caveat.variable)}
       suppressHydrationWarning
     >
       <body>

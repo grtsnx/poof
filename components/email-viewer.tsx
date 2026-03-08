@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
+import { useIsMobile } from "@/hooks/use-is-mobile"
 import { StoredEmail } from "@/lib/db"
 import { extractOTPs, extractVerifyLinks, createSandboxedIframeContent } from "@/lib/email-utils"
 import { OTPBadge } from "./otp-badge"
@@ -16,6 +17,7 @@ export function EmailViewer({ email, onBack }: Props) {
   const [viewMode, setViewMode] = useState<"rendered" | "plain">("rendered")
   const [verifying, setVerifying] = useState(false)
   const [verifyResult, setVerifyResult] = useState<string | null>(null)
+  const isMobile = useIsMobile()
 
   const otps = useMemo(() => (email ? extractOTPs(email.textContent || email.htmlContent) : []), [email])
   const verifyLinks = useMemo(() => (email ? extractVerifyLinks(email.htmlContent) : []), [email])
@@ -46,6 +48,23 @@ export function EmailViewer({ email, onBack }: Props) {
         <p className="viewer-empty-text">
           Pick something from the inbox. We&apos;ll wait.
         </p>
+        {!isMobile && (
+          <div className="viewer-empty-drag-hint" aria-hidden>
+            <svg
+              className="viewer-empty-drag-arrow"
+              viewBox="0 0 40 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              {/* Hand-drawn style arrow pointing left toward the divider */}
+              <path d="M36 12 H10 M10 12 L16 6 M10 12 L16 18" />
+            </svg>
+            <span className="viewer-empty-drag-text">you can drag me</span>
+          </div>
+        )}
       </div>
     )
   }

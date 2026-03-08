@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import { useEmail } from "@/hooks/use-email"
+import { useIsMobile } from "@/hooks/use-is-mobile"
 import { useSSE } from "@/hooks/use-sse"
 import { EmailAddressBar } from "@/components/email-address-bar"
 import { BurnTimer } from "@/components/burn-timer"
@@ -79,6 +80,40 @@ export default function Home() {
   const [mobileTab, setMobileTab] = useState<"inbox" | "viewer">("inbox")
   const [showHistory, setShowHistory] = useState(false)
   const [burnProgress, setBurnProgress] = useState(0)
+  const isMobile = useIsMobile()
+  const [inboxWidth, setInboxWidth] = useState(320)
+  const isDragging = useRef(false)
+  const dragStartX = useRef(0)
+  const dragStartWidth = useRef(0)
+
+  const handleDividerMouseDown = useCallback((e: React.MouseEvent) => {
+    if (window.innerWidth <= 900) return
+    isDragging.current = true
+    dragStartX.current = e.clientX
+    dragStartWidth.current = inboxWidth
+    document.body.style.cursor = "col-resize"
+    document.body.style.userSelect = "none"
+  }, [inboxWidth])
+
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      if (!isDragging.current) return
+      const delta = e.clientX - dragStartX.current
+      setInboxWidth(Math.max(200, Math.min(520, dragStartWidth.current + delta)))
+    }
+    const onUp = () => {
+      if (!isDragging.current) return
+      isDragging.current = false
+      document.body.style.cursor = ""
+      document.body.style.userSelect = ""
+    }
+    document.addEventListener("mousemove", onMove)
+    document.addEventListener("mouseup", onUp)
+    return () => {
+      document.removeEventListener("mousemove", onMove)
+      document.removeEventListener("mouseup", onUp)
+    }
+  }, [])
 
   useEffect(() => {
     if (!config?.burnAt) {
@@ -187,21 +222,36 @@ export default function Home() {
                 isLoading={isLoading}
                 onGenerateNew={generateNewEmail}
                 unreadCount={unreadCount}
-              />
-              <BurnTimer
-                config={config}
-                isBurned={isBurned}
-                onSetDuration={setBurnDuration}
-                onBurnNow={burnNow}
-              />
+              >
+                {isMobile && (
+                  <BurnTimer
+                    config={config}
+                    isBurned={isBurned}
+                    onSetDuration={setBurnDuration}
+                    onBurnNow={burnNow}
+                    compact
+                  />
+                )}
+              </EmailAddressBar>
+              {!isMobile && (
+                <BurnTimer
+                  config={config}
+                  isBurned={isBurned}
+                  onSetDuration={setBurnDuration}
+                  onBurnNow={burnNow}
+                />
+              )}
             </div>
           </div>
         </div>
       </section>
 
       {!isBurned && (
-        <main className="main-panel">
-          <div className="mobile-tabs">
+        <main
+          className="main-panel"
+          style={{ gridTemplateColumns: `${inboxWidth}px 4px 1fr` }}
+        >
+          <div className="mobile-tabs" style={{ gridColumn: "1 / -1" }}>
             <button
               className={`mobile-tab ${mobileTab === "inbox" ? "mobile-tab--active" : ""}`}
               onClick={() => setMobileTab("inbox")}
@@ -247,9 +297,11 @@ export default function Home() {
                 onOpenHistory={handleOpenHistory}
                 onClearAllHistory={clearAllHistory}
                 historyCount={archivedAddresses.length}
+                showDragHint={!isMobile}
               />
             )}
           </aside>
+          <div className="panel-divider" onMouseDown={handleDividerMouseDown} />
           <section
             className={`panel-viewer ${mobileTab === "inbox" ? "panel-mobile-hidden" : ""}`}
           >

@@ -13,9 +13,10 @@ interface Props {
   onOpenHistory: () => void
   onClearAllHistory: () => Promise<void>
   historyCount: number
+  showDragHint?: boolean
 }
 
-export function Inbox({ emails, selectedId, onSelect, onDelete, isConnected, onOpenHistory, onClearAllHistory, historyCount }: Props) {
+export function Inbox({ emails, selectedId, onSelect, onDelete, isConnected, onOpenHistory, onClearAllHistory, historyCount, showDragHint = false }: Props) {
   if (emails.length === 0) {
     return (
       <div className="inbox-empty">
@@ -33,12 +34,29 @@ export function Inbox({ emails, selectedId, onSelect, onDelete, isConnected, onO
             {isConnected ? "● LIVE" : "◌ CONNECTING"}
           </span>
         </div>
+        {showDragHint && (
+          <div className="inbox-empty-drag-hint" aria-hidden>
+            <span className="viewer-empty-drag-text">you can drag me</span>
+            <svg
+              className="viewer-empty-drag-arrow"
+              viewBox="0 0 40 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M4 12 H30 M30 12 L24 6 M30 12 L24 18" />
+            </svg>
+          </div>
+        )}
         {historyCount > 0 && (
           <div className="inbox-empty-history-actions">
             <button className="inbox-history-btn" onClick={onOpenHistory}>
               <ClockCounterClockwise size={13} />
               {historyCount} past address{historyCount !== 1 ? "es" : ""}
             </button>
+            <span className="inbox-empty-sep">·</span>
             <button className="inbox-history-btn inbox-history-btn--clear" onClick={onClearAllHistory} title="Clear all history">
               <FireSimple weight="bold" size={12} />
               <span>Clear all</span>

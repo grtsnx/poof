@@ -480,6 +480,15 @@ body {
   position: relative;
 }
 
+.address-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+}
+
 .address-hint {
   font-size: 12px;
   color: var(--text-3);
@@ -712,6 +721,40 @@ body {
 
 .burn-timer-actions { position: relative; }
 
+/* Compact burn timer (mobile: same row as Copy / New) */
+.burn-timer--compact {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.burn-timer--compact .burn-timer-actions { margin: 0; }
+
+/* Duration button as sibling of Copy/New on mobile (equal spacing in row) */
+.burn-timer-actions--inline {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+}
+.burn-icon--compact {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.burn-countdown--compact {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  letter-spacing: 0.02em;
+}
+
 .burn-options {
   position: absolute;
   top: calc(100% + 8px);
@@ -726,6 +769,11 @@ body {
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+.burn-options--overlay {
+  position: static;
+  min-width: 100%;
 }
 
 .burn-option {
@@ -752,7 +800,7 @@ body {
 /* ─── Main Panel ─────────────────────────────────────────────────────── */
 .main-panel {
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: 320px 4px 1fr;
   height: 580px;
   max-width: 1200px;
   margin: 0 auto 48px;
@@ -765,10 +813,21 @@ body {
 
 /* ─── Inbox ──────────────────────────────────────────────────────────── */
 .panel-inbox {
-  border-right: 1px solid var(--border);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+}
+
+.panel-divider {
+  cursor: col-resize;
+  background: var(--border);
+  transition: background 0.15s;
+  position: relative;
+  z-index: 1;
+}
+.panel-divider:hover,
+.panel-divider:active {
+  background: var(--border-2);
 }
 
 /* Custom scrollbar */
@@ -804,6 +863,19 @@ body {
 }
 
 .inbox-status-dot { margin-top: 8px; }
+
+.inbox-empty-drag-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  transform: rotate(1deg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
 
 .status-live {
   font-family: var(--font-mono);
@@ -870,14 +942,14 @@ body {
 .inbox-history-btn {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 9px;
   color: var(--text-3);
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 3px 7px;
+  padding: 2px 5px;
   border-radius: var(--radius-sm);
   transition: all 0.12s;
   letter-spacing: 0.04em;
@@ -889,8 +961,17 @@ body {
 .inbox-empty-history-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   margin-top: 10px;
+}
+
+.inbox-empty-sep {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-3);
+  opacity: 0.4;
+  padding: 0 2px;
+  pointer-events: none;
 }
 
 /* ─── History Panel ──────────────────────────────────────────────────── */
@@ -1156,6 +1237,35 @@ body {
   font-size: 13px;
   color: var(--text-3);
   font-style: italic;
+}
+
+.viewer-empty-drag-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  transform: rotate(-1.5deg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.viewer-empty-drag-arrow {
+  width: 40px;
+  height: 24px;
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+
+.viewer-empty-drag-text {
+  font-family: var(--font-handwritten), cursive;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--text-2);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 .viewer {
@@ -1598,13 +1708,14 @@ body {
   .hero-sub { max-width: 100%; }
 
   .main-panel {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
     height: auto;
     width: calc(100% - 48px);
   }
 
+  .panel-divider { display: none; }
+
   .panel-inbox {
-    border-right: none;
     border-bottom: 1px solid var(--border);
     max-height: 320px;
     overflow-y: auto;
@@ -1614,6 +1725,21 @@ body {
   .viewer { height: 420px; }
 
   .features-section { width: calc(100% - 48px); }
+}
+
+/* ── Desktop: keep default address bar spacing ── */
+@media (min-width: 641px) {
+  .address-bar {
+    gap: 12px;
+  }
+  .address-actions-row {
+    gap: 8px;
+    justify-content: flex-end;
+  }
+  .address-actions {
+    gap: 8px;
+    justify-content: flex-end;
+  }
 }
 
 /* ── Mobile (≤ 640px) ── */
@@ -1640,25 +1766,63 @@ body {
   .hero-title { font-size: clamp(28px, 8vw, 40px); }
   .hero-sub { font-size: 14px; }
 
-  /* Address bar: stack on small screens */
+  /* Address bar: email on one full line, then actions row */
   .address-bar {
     flex-direction: column;
+    flex-wrap: nowrap;
     align-items: stretch;
-    gap: 10px;
+    gap: 12px;
     padding: 12px 14px;
+    min-width: 0;
+  }
+  .address-bar .address-display {
+    font-size: 13px;
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
+  .address-bar .address-actions-row {
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    min-width: 0;
+    -webkit-overflow-scrolling: touch;
+    gap: 16px;
+    justify-content: flex-start;
+  }
+  .address-bar .address-actions-row > * {
+    flex-shrink: 0;
   }
   .address-display {
     font-size: 13px;
   }
   .address-actions {
-    justify-content: flex-end;
+    justify-content: flex-start;
     flex-wrap: nowrap;
+    gap: 16px;
+  }
+  .address-actions-row {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    min-width: 0;
+    gap: 16px;
   }
   /* Touch-friendly button sizing */
   .btn-icon {
     min-height: 40px;
     padding: 8px 14px;
     font-size: 13px;
+  }
+  /* Mobile: icon-only for Copy and New in address bar */
+  .hero-email-box .address-actions .btn-icon .btn-icon-label {
+    display: none;
+  }
+  .hero-email-box .address-actions .btn-icon {
+    padding: 8px 10px;
   }
   .btn-ghost-sm {
     min-height: 36px;
@@ -1701,7 +1865,7 @@ body {
     content: "";
     position: absolute;
     inset: 0;
-    border-radius: var(--radius-lg);
+    border-radius: 18px;
     padding: 3px;
     background: conic-gradient(
       from -90deg,
@@ -1728,17 +1892,18 @@ body {
     position: relative;
     z-index: 1;
     background: var(--bg-2);
-    border-radius: calc(var(--radius-lg) - 2px);
-    overflow: hidden;
+    border-radius: 18px;
+    overflow: visible;
   }
   .hero-email-box .address-bar-wrap {
     margin: 0;
   }
   .hero-email-box .address-bar {
     border: none;
-    border-radius: 0;
-    border-bottom: 1px solid var(--border);
+    border-image: none;
+    border-radius: 18px;
     margin: 0;
+    border-bottom: 1px solid var(--border);
   }
   .hero-email-box .burn-timer,
   .hero-email-box .burn-timer--urgent,
@@ -1755,6 +1920,11 @@ body {
   .hero-email-box .address-bar-skeleton {
     border: none;
     border-radius: 0;
+  }
+
+  /* Spacing: countdown close to flame, equal gap between row items */
+  .hero-email-box .burn-timer--compact {
+    gap: 8px;
   }
 
   /* Main panel: enable tab switcher */

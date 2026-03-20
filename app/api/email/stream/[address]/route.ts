@@ -11,12 +11,12 @@
 import { NextRequest } from "next/server"
 import { createSubscriber, emailChannel } from "@/lib/redis"
 
-/** Close connection before Vercel's 300s timeout so client can reconnect. */
-const MAX_STREAM_SECONDS = 240
+/** Close connection quickly to stay under Vercel's provisioned memory limits. */
+const MAX_STREAM_SECONDS = 9
 
 export const dynamic = "force-dynamic"
 export const runtime = "nodejs"
-export const maxDuration = 300
+export const maxDuration = 10
 
 export async function GET(
   req: NextRequest,

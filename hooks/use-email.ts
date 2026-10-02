@@ -45,7 +45,7 @@ interface UseEmailReturn {
   clearSelection: () => void
   burnNow: () => Promise<void>
   refreshEmails: () => Promise<void>
-  addEmailFromSSE: (raw: RawIncomingEmail) => Promise<void>
+  addIncomingEmail: (raw: RawIncomingEmail) => Promise<void>
   viewHistoryAddress: (email: string) => Promise<void>
   removeArchivedAddress: (email: string) => Promise<void>
   clearHistoryView: () => void
@@ -205,12 +205,15 @@ export function useEmail(): UseEmailReturn {
     setArchivedAddresses(archived)
   }, [config])
 
-  const addEmailFromSSE = useCallback(
+  const addIncomingEmail = useCallback(
     async (raw: RawIncomingEmail) => {
       if (!config) return
 
       const { extractOTPs, extractVerifyLinks } = await import("@/lib/email-utils")
-      const { saveEmail } = await import("@/lib/db")
+      const { saveEmail, hasEmail } = await import("@/lib/db")
+
+      // Already stored (e.g. re-sent in the poll overlap window after a reload)
+      if (await hasEmail(raw.id)) return
 
       const otps = extractOTPs(raw.text || raw.html)
       const verifyLinks = extractVerifyLinks(raw.html)
@@ -298,7 +301,7 @@ export function useEmail(): UseEmailReturn {
     clearSelection,
     burnNow,
     refreshEmails,
-    addEmailFromSSE,
+    addIncomingEmail,
     viewHistoryAddress,
     removeArchivedAddress,
     clearHistoryView,

@@ -13,6 +13,7 @@ export interface DeviceConfig {
   createdAt: number
   burnAt: number | null // epoch ms, null = never
   burnDuration: "5min" | "1hour" | "24hours" | "never"
+  syncedAt?: number // epoch ms (server time) of the last successful inbox poll
 }
 
 export interface ArchivedAddress {
@@ -133,6 +134,18 @@ export async function getArchivedAddresses(): Promise<ArchivedAddress[]> {
 export async function deleteArchivedAddress(email: string): Promise<void> {
   const db = await getDB()
   await db.delete("history", email.toLowerCase())
+}
+
+export async function hasEmail(id: string): Promise<boolean> {
+  const db = await getDB()
+  return (await db.getKey("emails", id)) !== undefined
+}
+
+/** Persist the inbox poll cursor without touching the rest of the config */
+export async function saveSyncCursor(email: string, syncedAt: number): Promise<void> {
+  const db = await getDB()
+  const config = await db.get("device", "singleton")
+  if (config && config.email === email) await db.put("device", { ...config, syncedAt })
 }
 
 /** Save a new email (encrypts content before storing) */

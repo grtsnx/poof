@@ -3,7 +3,8 @@
 import { useState, useCallback, useEffect, useRef } from "react"
 import { useEmail } from "@/hooks/use-email"
 import { useIsMobile } from "@/hooks/use-is-mobile"
-import { useSSE } from "@/hooks/use-sse"
+import { useInboxPoll } from "@/hooks/use-inbox-poll"
+import { saveSyncCursor } from "@/lib/db"
 import { EmailAddressBar } from "@/components/email-address-bar"
 import { BurnTimer } from "@/components/burn-timer"
 import { Inbox } from "@/components/inbox"
@@ -74,7 +75,7 @@ export default function Home() {
     removeEmail,
     clearSelection,
     burnNow,
-    addEmailFromSSE,
+    addIncomingEmail,
     viewHistoryAddress,
     removeArchivedAddress,
     clearHistoryView,
@@ -135,9 +136,19 @@ export default function Home() {
     return () => clearInterval(t)
   }, [config?.burnAt, config?.createdAt])
 
-  useSSE({
-    address: config?.email ?? null,
-    onEmail: addEmailFromSSE,
+  const pollAddress = config && !isBurned ? config.email : null
+  const handleCursor = useCallback(
+    (cursor: number) => {
+      if (pollAddress) saveSyncCursor(pollAddress, cursor).catch(() => {})
+    },
+    [pollAddress]
+  )
+
+  useInboxPoll({
+    address: pollAddress,
+    since: config ? (config.syncedAt ?? config.createdAt) : null,
+    onEmail: addIncomingEmail,
+    onCursor: handleCursor,
     onConnected: () => setIsConnected(true),
     onDisconnected: () => setIsConnected(false),
   })

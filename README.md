@@ -24,7 +24,7 @@ A privacy-first disposable email service built with Next.js. Generate a temporar
 ## Features
 
 - **Disposable inboxes** — Random address generated per device, no sign-up required
-- **Real-time delivery** — Emails arrive instantly via Server-Sent Events (SSE) backed by Redis pub/sub
+- **Real-time delivery** — New emails show up within ~3 seconds; the browser polls an API route that reads them straight from Resend (no webhook, no Redis)
 - **Client-side encryption** — Email content is AES-GCM encrypted in the browser before being stored in IndexedDB
 - **Auto-burn timer** — Inbox self-destructs after 5 minutes, 1 hour, 24 hours, or never
 - **Burn on command** — Instantly wipe an address and all its emails
@@ -42,8 +42,8 @@ A privacy-first disposable email service built with Next.js. Generate a temporar
 | Framework | Next.js 16 (App Router, Turbopack) |
 | UI | HeroUI, Tailwind CSS v4 |
 | Icons | Phosphor Icons |
-| Email provider | [Resend](https://resend.com) (inbound webhooks) |
-| Real-time | Server-Sent Events (SSE) + Redis pub/sub (`ioredis`) |
+| Email provider | [Resend](https://resend.com) (inbound receiving API) |
+| Real-time | Short polling (~3s) of `/api/email/inbox/[address]` |
 | Local storage | IndexedDB via `idb` |
 | Encryption | Web Crypto API — AES-GCM 256-bit |
 | Language | TypeScript |
@@ -53,17 +53,19 @@ A privacy-first disposable email service built with Next.js. Generate a temporar
 ```
 User opens app
   └─> Device config created in IndexedDB (email address + burn timer)
-  └─> SSE connection opened to /api/email/stream/[address]
-  └─> Stream handler subscribes to Redis channel poof:email:[address]
+  └─> Browser polls /api/email/inbox/[address]?since=<cursor> every ~3s
+      (every 15s while the tab is in the background)
 
 Sender sends email to anything@yourdomain.com
-  └─> Resend receives it via inbound MX
-  └─> Resend POSTs to /api/email/receive (webhook)
-  └─> Server validates payload
-  └─> Publishes to Redis channel poof:email:[address]
-  └─> All subscribed SSE streams forward the event to their clients
+  └─> Resend receives it via inbound MX and keeps it
 
-Browser receives SSE event
+Next poll
+  └─> Server lists recent inbound emails from Resend (cached ~2s, shared by all polls)
+  └─> Filters to the polled address, fetches the full email + attachments
+  └─> Returns new emails and a cursor; the browser saves the cursor so
+      nothing is missed between polls or reloads
+
+Browser receives new emails
   └─> Email content encrypted with AES-GCM device key
   └─> Stored in IndexedDB
   └─> UI updates instantly
@@ -78,8 +80,8 @@ User burns the inbox
 
 ### Prerequisites
 
-- Node.js 18+
-- A Redis instance (local, [Upstash](https://upstash.com), Railway, etc.)
+- [Bun](https://bun.sh) 1.3+ (package manager)
+- Node.js 20.9+ (required by Next.js 16)
 - A [Resend](https://resend.com) account with a verified domain and inbound email enabled
 
 ### 1. Clone and install
@@ -87,7 +89,7 @@ User burns the inbox
 ```bash
 git clone https://github.com/yourusername/poof.git
 cd poof
-pnpm install
+bun install
 ```
 
 ### 2. Configure environment
@@ -100,48 +102,25 @@ cp .env.local.example .env.local
 |---|---|---|
 | `RESEND_API_KEY` | Yes | Your Resend API key |
 | `NEXT_PUBLIC_EMAIL_DOMAIN` | Yes | Your verified domain (e.g. `yourdomain.com`) |
-| `REDIS_URL` | Yes | Redis connection URL (e.g. `redis://localhost:6379`) |
-| `WEBHOOK_SECRET` | No | Random secret for webhook request validation |
 | `NEXT_PUBLIC_APP_URL` | No | Your deployed app URL (use an ngrok URL for local inbound) |
 | `NEXT_PUBLIC_GITHUB_URL` | No | If set, shows a GitHub link in the footer |
 
-### 3. Start Redis
-
-For local development:
-
-```bash
-# macOS
-brew install redis && brew services start redis
-
-# Docker
-docker run -p 6379:6379 redis:alpine
-```
-
-For production, use a hosted Redis service such as [Upstash](https://upstash.com) (free tier available) and set `REDIS_URL` to the connection string they provide.
-
-### 4. Configure Resend inbound
+### 3. Configure Resend inbound
 
 1. Go to **Resend → Domains → your domain → Inbound**
 2. Add the MX record Resend provides
-3. Set the **webhook URL** to your app base URL + `/api/email/receive`:
-   ```text
-   https://yourapp.com/api/email/receive
-   ```
-   For local development with ngrok, use your tunnel URL:
-   ```text
-   https://your-subdomain.ngrok-free.app/api/email/receive
-   ```
-4. To verify webhook signatures (recommended in production), copy the **signing secret** from Resend’s webhook settings (it starts with `whsec_`) into `WEBHOOK_SECRET` or `RESEND_WEBHOOK_SECRET`. Leave empty to skip verification (e.g. for local testing).
+No webhook is needed — the app reads inbound emails through Resend's API using `RESEND_API_KEY`, so it also works locally without a tunnel.
 
-### 5. Run locally
+> **Rate limits:** Resend rate-limits API calls per team. Polls on the same server instance share one cached listing (refreshed at most every 2s), and the client backs off on `429`. For high traffic, ask Resend to raise your limit.
+
+### 4. Run locally
 
 ```bash
-pnpm dev
+bun run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
-> **Local inbound emails:** Resend can't reach `localhost`. Use a tunnel like [ngrok](https://ngrok.com) and set `NEXT_PUBLIC_APP_URL` to your tunnel URL; point the Resend webhook at `https://your-ngrok-url.ngrok-free.app/api/email/receive` during development.
 
 ## Project Structure
 
@@ -149,8 +128,7 @@ Open [http://localhost:3000](http://localhost:3000).
 app/
   api/
     email/
-      receive/route.ts          # POST — Resend inbound webhook → publishes to Redis
-      stream/[address]/route.ts # GET  — SSE stream; subscribes to Redis channel
+      inbox/[address]/route.ts  # GET  — new emails for an address, read from Resend
       generate/route.ts         # POST — optional server-side address generation
   layout.tsx
   page.tsx
@@ -169,13 +147,12 @@ components/
 
 hooks/
   use-email.ts                  # Core state: config, emails, burn logic, history
-  use-sse.ts                    # SSE connection management
+  use-inbox-poll.ts             # Polls the inbox route, tracks the cursor
   use-is-mobile.ts              # Viewport ≤640px for responsive layout
   use-new-email-sound.ts        # Optional sound on new email
 
 lib/
-  redis.ts                      # ioredis singleton publisher + subscriber factory
-  sse-manager.ts                # broadcastToAddress — publishes via Redis
+  inbox.ts                      # Resend receiving API reads + short-lived cache
   crypto.ts                     # AES-GCM encrypt / decrypt (Web Crypto)
   db.ts                         # IndexedDB schema + CRUD via idb
   domains.ts                    # Address generation
@@ -185,34 +162,25 @@ lib/
 
 ## API
 
-### `POST /api/email/receive`
+### `GET /api/email/inbox/[address]?since=<epoch ms>`
 
-Resend inbound webhook. **URL:** `https://<your-app-url>/api/email/receive`
-
-Validates the payload and publishes the email to the Redis channel for the recipient address. All connected SSE streams subscribed to that channel receive the event.
+Returns emails sent to `address` that Resend received at or after `since`, oldest first, plus the server time `now`. The client sends `now` (minus a 30s overlap) back as the next `since` and skips IDs it has already stored. Returns `429` with `Retry-After` when Resend rate-limits.
 
 **Response:**
 ```json
-{ "ok": true, "delivered": 1, "id": "uuid" }
-```
-
-### `GET /api/email/stream/[address]`
-
-Opens a persistent SSE stream. Subscribes to the Redis channel `poof:email:[address]` and forwards any published messages to the client. Sends a heartbeat comment every 25 seconds to keep the connection alive through proxies. Unsubscribes and closes the Redis connection on client disconnect.
-
-**Event payload:**
-```json
 {
-  "type": "email",
-  "email": {
-    "id": "uuid",
-    "from": "sender@example.com",
-    "subject": "Your OTP",
-    "html": "<p>Your code is 123456</p>",
-    "text": "Your code is 123456",
-    "receivedAt": 1712345678901,
-    "attachments": []
-  }
+  "emails": [
+    {
+    "id": "resend-email-id",
+      "from": "sender@example.com",
+      "subject": "Your OTP",
+      "html": "<p>Your code is 123456</p>",
+      "text": "Your code is 123456",
+      "receivedAt": 1712345678901,
+      "attachments": []
+    }
+  ],
+  "now": 1712345680000
 }
 ```
 
@@ -224,25 +192,26 @@ Opens a persistent SSE stream. Subscribes to the Redis channel `poof:email:[addr
 | Attachments | IndexedDB (browser) | Yes — AES-GCM 256-bit |
 | Device config (address, timer) | IndexedDB (browser) | No |
 | Encryption key | localStorage | No (base64 raw key) |
-| Emails in transit (Redis → SSE) | Redis pub/sub (in-flight only) | No (use TLS in prod) |
-| Emails at rest (server) | Nowhere | — |
+| Emails in transit (Resend → app → browser) | HTTPS only | TLS |
+| Emails at rest (server) | Resend (inbound storage, per your Resend retention) | Per Resend |
+| Emails at rest (this app) | Nowhere — only a few seconds of in-memory cache | — |
 
-The server never persists email content. Redis is used solely as a pub/sub message bus — messages are delivered to subscribers and immediately discarded.
+This app never persists email content. Inbound emails live in your Resend account (as they do with any Resend inbound setup); the API route only caches them in memory briefly to stay under Resend's rate limits.
 
 ## Scripts
 
 ```bash
-pnpm dev       # Start dev server with Turbopack (suppresses Node deprecation warnings)
-pnpm build     # Production build
-pnpm start     # Start production server
-pnpm lint      # ESLint
-pnpm format    # Prettier
-pnpm typecheck # TypeScript type check
+bun run dev        # Start dev server with Turbopack (suppresses Node deprecation warnings)
+bun run build      # Production build
+bun run start      # Start production server
+bun run lint       # ESLint
+bun run format     # Prettier
+bun run typecheck  # TypeScript type check
 ```
 
 If you see a `DEP0169 url.parse()` deprecation warning, it comes from a dependency (e.g. Next.js or a transitive package). The dev script sets `NODE_OPTIONS=--no-deprecation` to hide it. To show it again (e.g. to trace the source), run `node --trace-deprecation ./node_modules/.bin/next dev --turbopack`.
 
-**Vercel:** The SSE stream route (`/api/email/stream/[address]`) closes the connection after 4 minutes so it never hits Vercel’s 300s serverless limit; the client reconnects automatically. To suppress the DEP0169 warning on Vercel, set the environment variable `NODE_OPTIONS` = `--no-deprecation` in your project’s Environment Variables (Settings → Environment Variables).
+**Vercel:** Polling uses short, normal requests, so there are no long-running functions to tune. To suppress the DEP0169 warning on Vercel, set the environment variable `NODE_OPTIONS` = `--no-deprecation` in your project’s Environment Variables (Settings → Environment Variables).
 
 ## Contributing
 

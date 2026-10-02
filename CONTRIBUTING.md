@@ -8,20 +8,20 @@ Thank you for your interest in contributing to testMail. This document provides 
 2. **Install dependencies:**
 
    ```bash
-   pnpm install
+   bun install
    ```
 
 3. **Run the development server:**
 
    ```bash
-   pnpm dev
+   bun run dev
    ```
 
 ## Development
 
-- **Lint:** `pnpm lint`
-- **Format:** `pnpm format`
-- **Type check:** `pnpm typecheck`
+- **Lint:** `bun run lint`
+- **Format:** `bun run format`
+- **Type check:** `bun run typecheck`
 
 Please ensure these pass before submitting a pull request.
 
@@ -29,7 +29,7 @@ Please ensure these pass before submitting a pull request.
 
 1. Create a branch from `main` for your change (e.g. `fix/email-preview`, `feat/dark-mode`).
 2. Make your changes and add or update tests if applicable.
-3. Run `pnpm lint`, `pnpm format`, and `pnpm typecheck`.
+3. Run `bun run lint`, `bun run format`, and `bun run typecheck`.
 4. Push your branch and open a pull request against `main`.
 5. Describe your changes clearly in the PR description and link any related issues.
 6. Address review feedback if requested.

@@ -3,5 +3,5 @@ node_modules/
 .next/
 .turbo/
 coverage/
-pnpm-lock.yaml
+bun.lock
 .pnpm-store/
